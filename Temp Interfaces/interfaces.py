@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 import datetime
 
 
@@ -21,12 +22,23 @@ class IVideoWriter(ABC):
         pass
 
 
+@dataclass
 class DataRow:
-
-    def __init__(self, time: datetime, temp: float, p1: float, p2: float, p3: float, p4: float, p5: float,
-                 p6: float, p7: float, p8: float, p9: float):
-        self.time = time
-        temp: float, p1: float, p2: float, p3: float, p4: float, p5: float, p6: float, p7: float, p8: float, p9: float
+    """
+    Structure defining the values contained in a data row
+    Each row has a timestamp associated with it, a temperature, and a number of pressure readings
+    """
+    time: datetime
+    temp: float
+    p1: float
+    p2: float
+    p3: float
+    p4: float
+    p5: float
+    p6: float
+    p7: float
+    p8: float
+    p9: float
 
 
 class IDataReader(ABC):

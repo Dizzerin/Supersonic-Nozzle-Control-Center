@@ -1,5 +1,5 @@
 import dearpygui.dearpygui as dpg
-import Testing.Window
+import Testing.window
 
 
 def change_window(current: Window, new: Window):
