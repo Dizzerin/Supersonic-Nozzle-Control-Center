@@ -69,6 +69,7 @@ def print_lots_o_stuff(capture):
     # print("Saturation: " + str(capture.get(cv.CAP_PROP_SATURATION)))
     # input("hit key")
 
+
 def callback_autofocus(sender, data, user_data):
     AF_enabled = dpg.get_value(sender)
     capture = user_data
@@ -90,7 +91,7 @@ def callback_autofocus(sender, data, user_data):
 def update_focus(sender, data, user_data):
     new_focus_value = dpg.get_value(sender)
     capture = user_data
-    #TODO Focus must be: min: 0, max: 255, increment:5?
+    # TODO Focus must be: min: 0, max: 255, increment:5?
     capture.set(cv.CAP_PROP_FOCUS, new_focus_value)
     # Uncheck AutoFocus checkbox
     dpg.set_value("auto_focus", value=False)
@@ -99,7 +100,7 @@ def update_focus(sender, data, user_data):
 def update_brightness(sender, data, user_data):
     new_brightness_value = dpg.get_value(sender)
     capture = user_data
-    #TODO check range
+    # TODO check range
     capture.set(cv.CAP_PROP_BRIGHTNESS, new_brightness_value)
 
 

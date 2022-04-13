@@ -2,13 +2,12 @@ import dearpygui.dearpygui as dpg
 from dearpygui.demo import show_demo
 
 
-def run_demo():
-    dpg.create_context()
-    dpg.create_viewport()
-    dpg.setup_dearpygui()
+dpg.create_context()
+dpg.create_viewport()
+dpg.setup_dearpygui()
 
-    show_demo()
+show_demo()
 
-    dpg.show_viewport()
-    dpg.start_dearpygui()
-    dpg.destroy_context()
+dpg.show_viewport()
+dpg.start_dearpygui()
+dpg.destroy_context()

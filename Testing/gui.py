@@ -68,27 +68,15 @@ def run_gui(capture):
     dpg.show_viewport()
     dpg.maximize_viewport()
 
-    def changeTheWindow(c: IWindow, new: IWindow):
-        new.show()
-        c.remove()
-        dpg.set_primary_window(new.name(), True)
-
-    window = MainWindow()
-
     # below replaces, start_dearpygui()
     while dpg.is_dearpygui_running():
-        # insert here any code you would like to run in the render loop
+        # Code here runs as part of the render loop every frame update
         raw_data = cv2_testing.get_frame(capture)
         dpg.set_value("texture_tag", raw_data)
 
         # Todo temp testing
         # cv2_testing.print_lots_o_stuff(capture)
         labjacktesting.testU12()
-
-        new_window = window.update()
-        if new_window is not None:
-            change_window(window, new_window)
-            window = new_window
 
         # you can manually stop by using stop_dearpygui()
         dpg.render_dearpygui_frame()
