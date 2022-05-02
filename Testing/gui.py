@@ -4,11 +4,16 @@ import random
 import labjacktesting
 
 # TODO TEMP
+# Global pressures and other plot data
 time_data = [0]
 axis_start_time = 0
 axis_end_time = 200
-pressure_1_y_data = []
-pressure_2_y_data = []
+num_plots = 5
+p1_y_data = []
+p2_y_data = []
+p3_y_data = []
+p4_y_data = []
+p5_y_data = []
 
 
 def update_plot(series_tag, x_axis_tag, y_data):
@@ -21,7 +26,7 @@ def update_plot(series_tag, x_axis_tag, y_data):
 
 def run_gui(capture):
     # TODO don't use global data
-    global axis_end_time, axis_start_time, pressure_1_y_data, time_data
+    global axis_end_time, axis_start_time, p1_y_data, p2_y_data, p3_y_data, time_data
 
     dpg.create_context()
     dpg.create_viewport(title="Supersonic Nozzle Lab")
@@ -52,44 +57,48 @@ def run_gui(capture):
                 # Focus and brightness sliders
                 with dpg.group(horizontal=False):
                     # Todo Verify range
-                    dpg.add_slider_int(label="Focus", tag="focus", vertical=False, default_value=0, min_value=0, max_value=1012,
+                    dpg.add_slider_int(label="Focus", tag="focus", vertical=False, default_value=0, min_value=0,
+                                       max_value=1012,
                                        clamped=True, width=100, user_data=capture, callback=cv2_testing.update_focus)
                     # dpg.add_spacer(width=100)
-                    dpg.add_slider_int(label="Brightness", tag="brightness", vertical=False, default_value=0, min_value=-64,
+                    dpg.add_slider_int(label="Brightness", tag="brightness", vertical=False, default_value=0,
+                                       min_value=-64,
                                        max_value=64, width=100, clamped=True, user_data=capture,
                                        callback=cv2_testing.update_brightness)
             # Right-hand side group
             with dpg.group(horizontal=False) as right_group:
-
                 # Plots
-                with dpg.group() as plot_group:
+                with dpg.subplots(rows=5, columns=1, label="Live Pressures", width=800, height=5 * 150) as plot_group:
+                    # Create pressure plots
+                    """
+                    Create num_plots pressure subplots all with the following format
+                        plot label: p#_plot
+                        x-axis label: p#_x_axis
+                        y-axis label: p#_y_axis
+                        line series label: "Pressure #" (TODO set to more appropriate names later)
+                        line series tag: p#_series
+                    Where # is 1 up to num_plots
 
-                    # Pressure 1 Plot
-                    with dpg.plot(label="Live Pressure Data", tag="p1_plot", height=200, width=800):
-                        # Create legend
-                        dpg.add_plot_legend()
+                    Note:
+                        Each graph's y-axis series data must be set after this function creates all the graphs
+                        Also the labels the series data can be updated to be more meaningful than "Pressure #"
+                        Also the last plot has its x axis explicitly updated to show tick labels                    
+                    """
+                    for i in range(1, num_plots + 1):
+                        # Add plot
+                        with dpg.plot(label="p{}_plot".format(str(i)), no_title=True, no_menus=True):
+                            # Create legend
+                            dpg.add_plot_legend()
+                            # Create x and y axes
+                            dpg.add_plot_axis(dpg.mvXAxis, label="", tag="p{}_x_axis".format(str(i)),
+                                              no_tick_labels=True)
+                            with dpg.plot_axis(dpg.mvYAxis, label="(psi)", tag="p{}_y_axis".format(str(i))):
+                                # Create line_series plots
+                                dpg.add_line_series(time_data, [], label="Pressure {}".format(str(i)),
+                                                    tag="p{}_series".format(str(i)))
 
-                        # Create x and y axes
-                        dpg.add_plot_axis(dpg.mvXAxis, label="time (s)", tag="p1_x_axis")
-                        dpg.add_plot_axis(dpg.mvYAxis, label="pressure (psi)", tag="p1_y_axis")
-                        dpg.set_axis_limits_auto("p1_y_axis")
-
-                        # Create line_series plots
-                        dpg.add_line_series(time_data, pressure_1_y_data, label="Pressure 1", parent="p1_y_axis", tag="p1_series")
-
-                    # Pressure 2 Plot
-                    with dpg.plot(label="p1_plot", tag="p2_plot", height=200, width=800):
-                        # Create legend
-                        dpg.add_plot_legend()
-
-                        # Create x and y axes
-                        dpg.add_plot_axis(dpg.mvXAxis, label="time (s)", tag="p2_x_axis")
-                        dpg.add_plot_axis(dpg.mvYAxis, label="pressure (psi)", tag="p2_y_axis")
-                        dpg.set_axis_limits_auto("p2_y_axis")
-
-                        # Create line_series plots
-                        dpg.add_line_series(time_data, pressure_2_y_data, label="Pressure 2", parent="p2_y_axis", tag="p2_series")
-
+                    # Manually set last plot's x-axis to show labels and ticks (acts as shared x-axis)
+                    dpg.configure_item("p{}_x_axis".format(num_plots), no_tick_labels=False, label="time (s)")
 
     # Set main window to fill the entire viewport
     dpg.set_primary_window(main_window, True)
@@ -114,12 +123,18 @@ def run_gui(capture):
             axis_end_time += 1
 
         labjack_data = labjacktesting.read_ADC()
-        pressure_1_y_data.append(labjack_data.p1)
-        pressure_2_y_data.append(labjack_data.p2)
+        p1_y_data.append(labjack_data.p1)
+        p2_y_data.append(labjack_data.p2)
+        p3_y_data.append(labjack_data.p3)
+        p4_y_data.append(labjack_data.p4)
+        p5_y_data.append(labjack_data.p5)
 
         # Update plots
-        update_plot("p1_series", "p1_x_axis", pressure_1_y_data)
-        update_plot("p2_series", "p2_x_axis", pressure_2_y_data)
+        update_plot("p1_series", "p1_x_axis", p1_y_data)
+        update_plot("p2_series", "p2_x_axis", p2_y_data)
+        update_plot("p3_series", "p3_x_axis", p3_y_data)
+        update_plot("p4_series", "p4_x_axis", p4_y_data)
+        update_plot("p5_series", "p5_x_axis", p5_y_data)
 
         # You can manually stop by using stop_dearpygui()
         dpg.render_dearpygui_frame()
