@@ -18,12 +18,45 @@ p4_y_data = []
 t0_y_data = []
 
 
+def update_video(capture):
+    raw_data = cv2_testing.get_frame(capture)
+    dpg.set_value("texture_tag", raw_data)
+
+
 def update_plot(series_tag, x_axis_tag, y_data):
     # "Scroll" x-axis
     dpg.set_axis_limits(x_axis_tag, axis_start_time, axis_end_time)
 
     # Update axis data
     dpg.set_value(series_tag, [time_data, y_data])
+
+
+def update_plots():
+    # TODO don't use global data
+    global axis_end_time, axis_start_time, p0_y_data, p1_y_data, p2_y_data, p3_y_data, p4_y_data, t0_y_data, time_data
+
+    # Update time and pressure and temperature values
+    time_data.append(time_data[-1] + 1)
+    if len(time_data) >= axis_end_time:
+        axis_start_time += 1
+        axis_end_time += 1
+
+    # Read new data from ADC
+    labjack_data = labjacktesting.read_ADC()
+    p0_y_data.append(labjack_data.p0)
+    p1_y_data.append(labjack_data.p1)
+    p2_y_data.append(labjack_data.p2)
+    p3_y_data.append(labjack_data.p3)
+    p4_y_data.append(labjack_data.p4)
+    t0_y_data.append(labjack_data.t0)
+
+    # Update plots
+    update_plot("p0_series", "p0_x_axis", p0_y_data)
+    update_plot("p1_series", "p1_x_axis", p1_y_data)
+    update_plot("p2_series", "p2_x_axis", p2_y_data)
+    update_plot("p3_series", "p3_x_axis", p3_y_data)
+    update_plot("p4_series", "p4_x_axis", p4_y_data)
+    update_plot("t0_series", "t0_x_axis", t0_y_data)
 
 
 def run_gui(capture):
@@ -70,6 +103,7 @@ def run_gui(capture):
 
             # Right-hand side group
             with dpg.group(horizontal=False) as right_group:
+                # TODO make this an "add plots" function?
                 # Plots
                 with dpg.subplots(rows=num_pressure_plots+1, columns=1, row_ratios=[1, 1, 1, 1, 1, 1.3], label="Live Data", width=plot_width,
                                   height=((num_pressure_plots+1)*plot_height+10)) as plot_group:
@@ -79,16 +113,24 @@ def run_gui(capture):
                         plot label: p#_plot
                         x-axis label: p#_x_axis
                         y-axis label: p#_y_axis
-                        line series label: "Pressure #" (TODO set to more appropriate names later)
+                        line series label: "Pressure #"
                         line series tag: p#_series
                     Where # is 0 up to num_plots
 
                     Note:
                         Each graph's y-axis series data must be set after this function creates all the graphs
-                        Also the labels the series data can be updated to be more meaningful than "Pressure #" (TODO?)
-                        Also the y-axis range should be manually updated to reasonable values later (TODO)
-                        Also the last plot has its x axis explicitly updated to show tick labels
+                        
+                        Also the labels the series data can be updated to be more meaningful than "Pressure #"
+                        
+                        A final temperature plot is created separately at the end, this is partly because its name etc.
+                        is unique, but also because this plot's x-axis is shown (the others are hidden) in the way
+                        the last plot's x-axis is visually shared by all the plots.
+                        
+                        The row_ratios argument allows the last plot to take up more of the space, this is done because
+                        the last plot's x-axis includes labels, so the plot area is shrunk.  The ratios currently set to
+                        make all plot areas appear equal
                     """
+                    # TODO set each plot's y axis limits?
                     # Create pressure plots
                     for i in range(num_pressure_plots):
                         # Add plot
@@ -102,8 +144,6 @@ def run_gui(capture):
                                 # Create line_series plots
                                 dpg.add_line_series(time_data, [], label="Pressure {}".format(str(i)),
                                                     tag="p{}_series".format(str(i)))
-                    # Manually set plot's x-axis to show labels and ticks (acts as shared x-axis)
-                    # dpg.configure_item("p{}_x_axis".format(num_pressure_plots - 1), no_tick_labels=False, label="time (s)")
 
                     # Create temperature plot
                     with dpg.plot(label="t0_plot", no_title=True, no_menus=True):
@@ -136,33 +176,11 @@ def run_gui(capture):
     # Render Loop:
     # (This replaces start_dearpygui() and runs every frame)
     while dpg.is_dearpygui_running():
-        raw_data = cv2_testing.get_frame(capture)
-        dpg.set_value("texture_tag", raw_data)
+        update_video(capture)
+        update_plots()
 
         # Todo temp testing
         # cv2_testing.print_lots_o_stuff(capture)
-
-        # Update time and pressure and temperature values
-        time_data.append(time_data[-1] + 1)
-        if len(time_data) >= axis_end_time:
-            axis_start_time += 1
-            axis_end_time += 1
-
-        labjack_data = labjacktesting.read_ADC()
-        p0_y_data.append(labjack_data.p0)
-        p1_y_data.append(labjack_data.p1)
-        p2_y_data.append(labjack_data.p2)
-        p3_y_data.append(labjack_data.p3)
-        p4_y_data.append(labjack_data.p4)
-        t0_y_data.append(labjack_data.t0)
-
-        # Update plots
-        update_plot("p0_series", "p0_x_axis", p0_y_data)
-        update_plot("p1_series", "p1_x_axis", p1_y_data)
-        update_plot("p2_series", "p2_x_axis", p2_y_data)
-        update_plot("p3_series", "p3_x_axis", p3_y_data)
-        update_plot("p4_series", "p4_x_axis", p4_y_data)
-        update_plot("t0_series", "t0_x_axis", t0_y_data)
 
         # You can manually stop by using stop_dearpygui()
         dpg.render_dearpygui_frame()
