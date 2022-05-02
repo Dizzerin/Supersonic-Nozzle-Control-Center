@@ -32,6 +32,7 @@ def test_cv2():
 def initialize_capture():
     # Create a capture from camera
     camera_index = 1
+    # TODO use DSHOW only if windows (not linux) -- DSHOW is windows specific I think
     capture = cv.VideoCapture(camera_index, cv.CAP_DSHOW)
     # Check if camera stream could be opened/obtained
     if not capture.isOpened():
@@ -93,15 +94,25 @@ def update_focus(sender, data, user_data):
     capture = user_data
     # TODO Focus must be: min: 0, max: 255, increment:5?
     capture.set(cv.CAP_PROP_FOCUS, new_focus_value)
-    # Uncheck AutoFocus checkbox
+    # Uncheck DearPyGui's AutoFocus checkbox (TODO probably should have this tie in with UI better --- pass in UI tag or something)
     dpg.set_value("auto_focus", value=False)
 
 
 def update_brightness(sender, data, user_data):
     new_brightness_value = dpg.get_value(sender)
     capture = user_data
-    # TODO check range
+    # TODO check range (or make sure limits on slider are appropriate)
+    # Set brightness value
     capture.set(cv.CAP_PROP_BRIGHTNESS, new_brightness_value)
+
+
+def brightness_reset_callback(sender, data, user_data):
+    capture = user_data
+    # Reset brightness to 0
+    capture.set(cv.CAP_PROP_BRIGHTNESS, 0)
+    # Update DearPyGUI's slider value to match (TODO probably should have this tie in with UI better --- pass in UI tag or something)
+    dpg.set_value("brightness", value=0)
+
 
 
 def get_frame(capture):

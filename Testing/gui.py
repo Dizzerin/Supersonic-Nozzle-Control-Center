@@ -1,6 +1,5 @@
 import dearpygui.dearpygui as dpg
 from Testing import cv2_testing
-import random
 import labjacktesting
 
 # TODO TEMP
@@ -8,12 +7,15 @@ import labjacktesting
 time_data = [0]
 axis_start_time = 0
 axis_end_time = 200
-num_plots = 5
+num_pressure_plots = 5
+plot_height = 150       # pixels
+plot_width = 800        # pixels
+p0_y_data = []
 p1_y_data = []
 p2_y_data = []
 p3_y_data = []
 p4_y_data = []
-p5_y_data = []
+t0_y_data = []
 
 
 def update_plot(series_tag, x_axis_tag, y_data):
@@ -26,7 +28,7 @@ def update_plot(series_tag, x_axis_tag, y_data):
 
 def run_gui(capture):
     # TODO don't use global data
-    global axis_end_time, axis_start_time, p1_y_data, p2_y_data, p3_y_data, time_data
+    global axis_end_time, axis_start_time, p0_y_data, p1_y_data, p2_y_data, p3_y_data, p4_y_data, t0_y_data, time_data
 
     dpg.create_context()
     dpg.create_viewport(title="Supersonic Nozzle Lab")
@@ -41,17 +43,16 @@ def run_gui(capture):
 
         # Master group to divide window into two columns
         with dpg.group(horizontal=True) as master_group:
+
             # Left-hand side group
             with dpg.group(horizontal=False) as left_group:
                 # Video feed
                 dpg.add_image("texture_tag")
 
-                # Autofocus checkbox and reset button
+                # Autofocus checkbox
                 with dpg.group(horizontal=True):
                     dpg.add_checkbox(label="Auto Focus", default_value=True, user_data=capture,
                                      callback=cv2_testing.callback_autofocus, tag="auto_focus")
-                    # Todo below doesn't actually update brightness, just the slider
-                    dpg.add_button(label="reset", callback=lambda sender, data: dpg.set_value("brightness", value=0))
                     # dpg.add_checkbox(label="Auto Exposure")
 
                 # Focus and brightness sliders
@@ -65,11 +66,14 @@ def run_gui(capture):
                                        min_value=-64,
                                        max_value=64, width=100, clamped=True, user_data=capture,
                                        callback=cv2_testing.update_brightness)
+                    dpg.add_button(label="Reset brightness", user_data=capture, callback=cv2_testing.brightness_reset_callback)
+
             # Right-hand side group
             with dpg.group(horizontal=False) as right_group:
                 # Plots
-                with dpg.subplots(rows=5, columns=1, label="Live Pressures", width=800, height=5 * 150) as plot_group:
-                    # Create pressure plots
+                with dpg.subplots(rows=num_pressure_plots+1, columns=1, row_ratios=[1, 1, 1, 1, 1, 1.3], label="Live Data", width=plot_width,
+                                  height=((num_pressure_plots+1)*plot_height+10)) as plot_group:
+                    # Create pressure plots (and temperature plot at the end)
                     """
                     Create num_plots pressure subplots all with the following format
                         plot label: p#_plot
@@ -77,14 +81,16 @@ def run_gui(capture):
                         y-axis label: p#_y_axis
                         line series label: "Pressure #" (TODO set to more appropriate names later)
                         line series tag: p#_series
-                    Where # is 1 up to num_plots
+                    Where # is 0 up to num_plots
 
                     Note:
                         Each graph's y-axis series data must be set after this function creates all the graphs
-                        Also the labels the series data can be updated to be more meaningful than "Pressure #"
-                        Also the last plot has its x axis explicitly updated to show tick labels                    
+                        Also the labels the series data can be updated to be more meaningful than "Pressure #" (TODO?)
+                        Also the y-axis range should be manually updated to reasonable values later (TODO)
+                        Also the last plot has its x axis explicitly updated to show tick labels
                     """
-                    for i in range(1, num_plots + 1):
+                    # Create pressure plots
+                    for i in range(num_pressure_plots):
                         # Add plot
                         with dpg.plot(label="p{}_plot".format(str(i)), no_title=True, no_menus=True):
                             # Create legend
@@ -96,9 +102,30 @@ def run_gui(capture):
                                 # Create line_series plots
                                 dpg.add_line_series(time_data, [], label="Pressure {}".format(str(i)),
                                                     tag="p{}_series".format(str(i)))
+                    # Manually set plot's x-axis to show labels and ticks (acts as shared x-axis)
+                    # dpg.configure_item("p{}_x_axis".format(num_pressure_plots - 1), no_tick_labels=False, label="time (s)")
 
-                    # Manually set last plot's x-axis to show labels and ticks (acts as shared x-axis)
-                    dpg.configure_item("p{}_x_axis".format(num_plots), no_tick_labels=False, label="time (s)")
+                    # Create temperature plot
+                    with dpg.plot(label="t0_plot", no_title=True, no_menus=True):
+                        # Create legend
+                        dpg.add_plot_legend()
+                        # Create x and y axes
+                        # NOTE: This x-axis is visually shared with all the pressure graphs above!
+                        dpg.add_plot_axis(dpg.mvXAxis, label="time (s)", tag="t0_x_axis")
+                        with dpg.plot_axis(dpg.mvYAxis, label="(Kelvin)", tag="t0_y_axis"):
+                            # Create line_series plots
+                            dpg.add_line_series(time_data, [], label="Temperature 0", tag="t0_series")
+
+                # Make "Live Data" label/title of the plot group look nicer
+                #   Set PlotPadding to 7 and LabelPadding to 11
+                # TODO figure out why this theme isn't applying to the plot_group
+                #   Or maybe just add a text label and set its properties instead of adjusting all plots in the group
+                with dpg.theme() as plot_group_container_theme:
+                    with dpg.theme_component():
+                        dpg.add_theme_style(dpg.mvPlotStyleVar_PlotPadding, 10)
+                        dpg.add_theme_style(dpg.mvPlotStyleVar_LabelPadding, 10)
+                dpg.bind_item_theme(plot_group, plot_group_container_theme)
+                # dpg.show_style_editor()
 
     # Set main window to fill the entire viewport
     dpg.set_primary_window(main_window, True)
@@ -114,7 +141,6 @@ def run_gui(capture):
 
         # Todo temp testing
         # cv2_testing.print_lots_o_stuff(capture)
-        # labjacktesting.testU12()
 
         # Update time and pressure and temperature values
         time_data.append(time_data[-1] + 1)
@@ -123,18 +149,20 @@ def run_gui(capture):
             axis_end_time += 1
 
         labjack_data = labjacktesting.read_ADC()
+        p0_y_data.append(labjack_data.p0)
         p1_y_data.append(labjack_data.p1)
         p2_y_data.append(labjack_data.p2)
         p3_y_data.append(labjack_data.p3)
         p4_y_data.append(labjack_data.p4)
-        p5_y_data.append(labjack_data.p5)
+        t0_y_data.append(labjack_data.t0)
 
         # Update plots
+        update_plot("p0_series", "p0_x_axis", p0_y_data)
         update_plot("p1_series", "p1_x_axis", p1_y_data)
         update_plot("p2_series", "p2_x_axis", p2_y_data)
         update_plot("p3_series", "p3_x_axis", p3_y_data)
         update_plot("p4_series", "p4_x_axis", p4_y_data)
-        update_plot("p5_series", "p5_x_axis", p5_y_data)
+        update_plot("t0_series", "t0_x_axis", t0_y_data)
 
         # You can manually stop by using stop_dearpygui()
         dpg.render_dearpygui_frame()
