@@ -4,16 +4,18 @@ import random
 import labjacktesting
 
 # TODO TEMP
-xdata = list(range(0, 10))
+time_data = [0]
+axis_start_time = 0
+axis_end_time = 200
+pressure_1_y_data = []
 
 
-def update_series(sender, data):
-    # update x data
-    xdata.pop(0)
-    xdata.append(xdata[len(xdata) - 1] + 1)
-    dpg.set_value('series_tag', [xdata, random.sample(range(0, 10), 10)])
-    dpg.set_item_label('series_tag', "new data")
-    dpg.set_axis_limits("x_axis", min(xdata), max(xdata))
+def update_plot(series_tag, y_data):
+    # "Scroll" x-axis
+    dpg.set_axis_limits("p1_x_axis", axis_start_time, axis_end_time)
+
+    # Update axis data
+    dpg.set_value(series_tag, [time_data, y_data])
 
 
 def run_gui(capture):
@@ -27,40 +29,51 @@ def run_gui(capture):
         dpg.add_raw_texture(640, 480, raw_data, format=dpg.mvFormat_Float_rgba, tag="texture_tag")
 
     with dpg.window(label="Main Window") as main_window:
-        dpg.add_image("texture_tag")
 
-        with dpg.group(horizontal=True):
-            dpg.add_checkbox(label="Auto Focus", default_value=True, user_data=capture,
-                             callback=cv2_testing.callback_autofocus, tag="auto_focus")
-            # Todo below doesn't actually update brightness, just the slider
-            dpg.add_button(label="reset", callback=lambda sender, data: dpg.set_value("brightness", value=0))
-            # dpg.add_checkbox(label="Auto Exposure")
+        # Master group to divide window into two columns
+        with dpg.group(horizontal=True) as master_group:
+            # Left-hand side group
+            with dpg.group(horizontal=False) as left_group:
+                # Video feed
+                dpg.add_image("texture_tag")
 
-        with dpg.group(horizontal=True):
-            # Todo Verify range
-            dpg.add_slider_int(label="Focus", tag="focus", vertical=True, default_value=0, min_value=0, max_value=1012,
-                               clamped=True, user_data=capture, callback=cv2_testing.update_focus)
-            # dpg.add_spacer(width=100)
-            dpg.add_slider_int(label="Brightness", tag="brightness", vertical=True, default_value=0, min_value=-64,
-                               max_value=64,
-                               clamped=True, user_data=capture, callback=cv2_testing.update_brightness)
+                # Autofocus checkbox and reset button
+                with dpg.group(horizontal=True):
+                    dpg.add_checkbox(label="Auto Focus", default_value=True, user_data=capture,
+                                     callback=cv2_testing.callback_autofocus, tag="auto_focus")
+                    # Todo below doesn't actually update brightness, just the slider
+                    dpg.add_button(label="reset", callback=lambda sender, data: dpg.set_value("brightness", value=0))
+                    # dpg.add_checkbox(label="Auto Exposure")
 
-        with dpg.group():
-            dpg.add_button(label="Update Series", callback=update_series)
-            # create plot
-            with dpg.plot(label="Line Series", height=400, width=400):
-                # create legend
-                dpg.add_plot_legend()
+                # Focus and brightness sliders
+                with dpg.group(horizontal=False):
+                    # Todo Verify range
+                    dpg.add_slider_int(label="Focus", tag="focus", vertical=False, default_value=0, min_value=0, max_value=1012,
+                                       clamped=True, width=100, user_data=capture, callback=cv2_testing.update_focus)
+                    # dpg.add_spacer(width=100)
+                    dpg.add_slider_int(label="Brightness", tag="brightness", vertical=False, default_value=0, min_value=-64,
+                                       max_value=64, width=100, clamped=True, user_data=capture,
+                                       callback=cv2_testing.update_brightness)
+            # Right-hand side group
+            with dpg.group(horizontal=False) as right_group:
 
-                # REQUIRED: create x and y axes
-                dpg.add_plot_axis(dpg.mvXAxis, label="x", tag="x_axis")
-                dpg.set_axis_limits_auto("x_axis")
-                dpg.add_plot_axis(dpg.mvYAxis, label="y", tag="y_axis")
+                # Plots
+                with dpg.group() as plot_group:
 
-                # series belong to a y axis
-                dpg.add_line_series(list(range(5, 15)), random.sample(range(0, 10), 10), label="original data",
-                                    parent="y_axis",
-                                    tag="series_tag")
+                    # Pressure 1 Plot
+                    with dpg.plot(label="Pressure 1", tag="p1_plot", height=200, width=800):
+                        # Create legend
+                        dpg.add_plot_legend()
+
+                        # REQUIRED: create x and y axes
+                        dpg.add_plot_axis(dpg.mvXAxis, label="time (s)", tag="p1_x_axis")
+                        dpg.add_plot_axis(dpg.mvYAxis, label="pressure (psi)", tag="p1_y_axis")
+                        dpg.set_axis_limits_auto("p1_y_axis")
+
+                        # Series belong to a y-axis
+                        dpg.add_line_series(list(range(5, 15)), random.sample(range(0, 10), 10), label="p1",
+                                            parent="p1_y_axis",
+                                            tag="p1_series")
 
     # Set main window to fill the entire viewport
     dpg.set_primary_window(main_window, True)
@@ -76,8 +89,21 @@ def run_gui(capture):
 
         # Todo temp testing
         # cv2_testing.print_lots_o_stuff(capture)
-        labjacktesting.testU12()
+        # labjacktesting.testU12()
 
-        # you can manually stop by using stop_dearpygui()
+        global axis_end_time, axis_start_time, pressure_1_y_data, time_data
+        # Update time and pressure and temperature values
+        time_data.append(time_data[-1] + 1)
+        if len(time_data) >= axis_end_time:
+            axis_start_time += 1
+            axis_end_time += 1
+
+        pressure_1_y_data.append(labjacktesting.read_ADC().p1)
+
+        # Update plots
+        update_plot("p1_series", pressure_1_y_data)
+
+
+        # You can manually stop by using stop_dearpygui()
         dpg.render_dearpygui_frame()
     dpg.destroy_context()

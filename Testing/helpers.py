@@ -4,7 +4,7 @@ import Testing.window
 
 def change_window(current: Window, new: Window):
     new.show()
-    current.remove()
-    dpg.set_primary_window(new.name(), True)
+    current.hide()
+    dpg.set_primary_window(new._name(), True)
 
 

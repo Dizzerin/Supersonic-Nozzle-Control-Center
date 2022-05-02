@@ -1,7 +1,7 @@
 import dearpygui.dearpygui as dpg
 """
 This tests switching between two windows by first creating them both (with one hidden)
-and then alternating which one is hidden and which one is show and which one is the primary window
+and then alternating which one is hidden and which one is shown and which one is the primary window
 """
 
 

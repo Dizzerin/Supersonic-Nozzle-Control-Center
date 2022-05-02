@@ -1,28 +1,35 @@
 from abc import abstractmethod, ABC
 import dearpygui.dearpygui as dpg
-import helpers
+from typing import Type
 from typing import Callable, Optional
 
 
 class IWindow(ABC):
-    def __init__(self):
-        self._name = ""
+    @property
+    @abstractmethod
+    def name(self):
+        raise NotImplementedError
+
+    @name.getter
+    def name(self) -> str:
+        return self.name
 
     @abstractmethod
-    def get_name(self) -> str:
+    def create(self):
         pass
 
-    @abstractmethod
     def show(self):
-        pass
+        dpg.configure_item(self.name, show=True)
 
-    @abstractmethod
-    def remove(self):
-        pass
+    def hide(self):
+        dpg.configure_item(self.name, show=False)
 
-    @abstractmethod
-    def update(self) -> Optional["IWindow"]:
-        pass
+    def set_primary(self):
+        dpg.set_primary_window(self.name, True)
+
+    # @abstractmethod
+    # def update(self) -> Optional["IWindow"]:
+    #     pass
 
 
 class ReadDataInterface:
@@ -30,14 +37,29 @@ class ReadDataInterface:
 
 
 class RecordingWindow(IWindow):
+    @property
+    def name(self):
+        self._name = "RecordingWindow"
+
     def __init__(self, read: ReadDataInterface):
+        self._name = "RecordingWindow"
         self._read = read
-        pass
+
+    def _goto_window_callback(self, new_window: Type[IWindow]):
+        RecordingWindow.show(new_window)
+        RecordingWindow.set_primary(new_window)
+        self.hide()
+
+    def create(self):
+        with dpg.window(tag=self._name):
+            dpg.add_text("Live Session View")
+            dpg.add_button(label="Home", callback=lambda: self._goto_window_callback(WelcomeWindow))
 
 
-class IFileSelector:
+class IFileSelector(ABC):
     def get_file_from_user(self, starting_dir: str):
         pass
+
 
 class DearPyGuiSelector(IFileSelector):
     def __init__(self, parent_window):
@@ -48,6 +70,7 @@ class DearPyGuiSelector(IFileSelector):
         with self._parent:
             # probably maybe use Modal instead???
             dpg.add_file_dialog(directory_selector=True, show=True, )
+
 
 class SelectRecordingFileUseCase:
     def __init__(self, selector: IFileSelector):
@@ -60,26 +83,20 @@ class SelectRecordingFileUseCase:
         return file.name
 
 
-class MainWindow(IWindow):
+class WelcomeWindow(IWindow):
+    @property
+    def name(self):
+        self._name = "WelcomeWindow"
+
     def __init__(self):
-        self._name = "MainWindow"
-        self._next_window = None
+        self._name = "WelcomeWindow"
 
-    def get_name(self) -> str:
-        return self._name
+    def _goto_window_callback(self, new_window: Type[IWindow]):
+        RecordingWindow.show(new_window)
+        RecordingWindow.set_primary(new_window)
+        self.hide()
 
-    def _change_window_callback(self):
-        self._next_window = MainWindow()
-
-    def show(self):
-        with dpg.add_window(tag=self._name):
-            dpg.add_text(label="Main Window")
-            dpg.add_button(label="Change Window", callback=self._change_window_callback)
-
-    @staticmethod
-    def remove(self):
-        dpg.delete_item(self.name())
-
-    def update(self) -> Optional[IWindow]:
-        if self._next_window is not None:
-            return self._next_window
+    def create(self):
+        with dpg.window(tag=self._name):
+            dpg.add_text("Welcome")
+            dpg.add_button(label="Record a new session", callback=lambda: self._goto_window_callback(RecordingWindow))
