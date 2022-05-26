@@ -173,7 +173,7 @@ def run_gui(capture):
     dpg.show_viewport()
     dpg.maximize_viewport()
 
-    # Render Loop:
+    # Render Loop
     # (This replaces start_dearpygui() and runs every frame)
     while dpg.is_dearpygui_running():
         update_video(capture)

@@ -1,26 +1,26 @@
 from abc import ABC, abstractmethod
 
 
-class Screen(ABC):
+class Window(ABC):
     @abstractmethod
     def type(self) -> str:
         pass
 
     @abstractmethod
-    def handle(self) -> 'Screen':
+    def handle(self) -> 'Window':
         pass
 
 
-class WelcomeScreen(Screen):
+class WelcomeWindow(Window):
     def type(self) -> str:
-        return "Welcome Screen"
+        return "Welcome Window"
 
-    def handle(self) -> 'Screen':
+    def handle(self) -> 'Window':
         pass
 
 
 class UI:
     def __init__(self):
-        self.screen = ScreenType.WelcomeScreen
+        self.window = WindowType.WelcomeWindow
 
     def run(self):
