@@ -1,14 +1,34 @@
-from Testing import gui, cv2_testing
+from Testing import gui, cv2_testing, GUI_manager_test_1, GUI_manager_test_2
 
 
 if __name__ == '__main__':
-    # Testing
-    capture = cv2_testing.initialize_capture()
-    gui.run_gui(capture)
-    cv2_testing.end_capture(capture)
+
+    # Start GUI and Display Welcome Screen
+
+    # GUI and screen switching using method/organizational structure 1
+    GUI_manager_test_2.init_GUI()
+    GUI_manager_test_2.run_GUI()
+    GUI_manager_test_2.teardown_GUI()
+    exit()
+
+    # GUI and screen switching using method/organizational structure 2
+    GUI = GUI_manager_test_1.UI()
+    GUI.run()
+    GUI.teardown()
+
+    # TODO Camera selection (if multiple cameras, or use defaults etc. and settings/config files.)
+
+    """ Initialize Hardware """
+    # Initialize Camera Capture
+    capture = cv2_testing.initialize_capture(camera_index=0)
+    # Initialize ADC
 
     # Testing
     # cv2_testing.test_cv2()
-    # py_gui_demo.run_demo()
+    gui.run_gui(capture)
+
+    """ Teardown """
+    # Stop Camera Capture
+    cv2_testing.end_capture(capture)
 
 exit()

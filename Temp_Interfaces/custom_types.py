@@ -17,4 +17,3 @@ class DataRow:
     p2: float
     p3: float
     p4: float
-

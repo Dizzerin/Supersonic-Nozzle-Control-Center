@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class Screen(ABC):
     @abstractmethod
     def type(self) -> str:
@@ -10,19 +11,16 @@ class Screen(ABC):
         pass
 
 
-class MainMenu(Screen):
+class WelcomeScreen(Screen):
     def type(self) -> str:
-        return "Main Menu"
+        return "Welcome Screen"
 
     def handle(self) -> 'Screen':
         pass
 
 
 class UI:
-    def __init__(self
-                 ):
-        self.screen = ScreenType.MainMenu
+    def __init__(self):
+        self.screen = ScreenType.WelcomeScreen
 
     def run(self):
-
-

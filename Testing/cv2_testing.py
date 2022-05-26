@@ -2,6 +2,7 @@ import cv2 as cv
 import numpy as np
 import dearpygui.dearpygui as dpg
 
+
 def test_cv2():
     # Create a capture from camera
     camera_index = 1
@@ -29,9 +30,8 @@ def test_cv2():
     cv.destroyAllWindows()
 
 
-def initialize_capture():
+def initialize_capture(camera_index = 1):
     # Create a capture from camera
-    camera_index = 1
     # TODO use DSHOW only if windows (not linux) -- DSHOW is windows specific I think
     capture = cv.VideoCapture(camera_index, cv.CAP_DSHOW)
     # Check if camera stream could be opened/obtained
@@ -112,7 +112,6 @@ def brightness_reset_callback(sender, data, user_data):
     capture.set(cv.CAP_PROP_BRIGHTNESS, 0)
     # Update DearPyGUI's slider value to match (TODO probably should have this tie in with UI better --- pass in UI tag or something)
     dpg.set_value("brightness", value=0)
-
 
 
 def get_frame(capture):
