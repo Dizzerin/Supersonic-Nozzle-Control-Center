@@ -5,13 +5,13 @@ This uses a hybrid of functions and classes to try to manage and organize all wi
 """
 
 # Global (to this module) variables
-LIVE_SCREEN = None
-WELCOME_SCREEN = None
-CURRENT_SCREEN = None
+LIVE_WINDOW = None
+WELCOME_WINDOW = None
+CURRENT_WINDOW = None
 
 
 def init_GUI():
-    global LIVE_SCREEN, WELCOME_SCREEN, CURRENT_SCREEN
+    global LIVE_WINDOW, WELCOME_WINDOW, CURRENT_WINDOW
 
     # Initialization for DPG
     dpg.create_context()
@@ -21,16 +21,16 @@ def init_GUI():
     dpg.maximize_viewport()
 
     # Instantiate window classes
-    LIVE_SCREEN = LiveWindow()
-    WELCOME_SCREEN = WelcomeWindow()
+    LIVE_WINDOW = LiveWindow()
+    WELCOME_WINDOW = WelcomeWindow()
 
     # Create windows
-    LIVE_SCREEN.create()
-    WELCOME_SCREEN.create()
+    LIVE_WINDOW.create()
+    WELCOME_WINDOW.create()
 
     # Set primary window
-    dpg.set_primary_window(WELCOME_SCREEN.tag(), True)
-    CURRENT_SCREEN = WELCOME_SCREEN
+    dpg.set_primary_window(WELCOME_WINDOW.tag(), True)
+    CURRENT_WINDOW = WELCOME_WINDOW
 
 
 def run_GUI():
@@ -59,15 +59,15 @@ def change_window(to_window):
     :param to_window: window object to set as the new primary and visible window
     :return: None
     """
-    global CURRENT_SCREEN
+    global CURRENT_WINDOW
     # Show new window
     dpg.configure_item(to_window.tag(), show=True)
     # Set it as the new main window
     dpg.set_primary_window(to_window.tag(), True)
     # Hide the old window
-    dpg.configure_item(CURRENT_SCREEN.tag(), show=False)
+    dpg.configure_item(CURRENT_WINDOW.tag(), show=False)
     # Update current window global
-    CURRENT_SCREEN = to_window
+    CURRENT_WINDOW = to_window
 
 
 # Abstract base class which all windows implement
@@ -88,12 +88,12 @@ class WelcomeWindow(Window):
         return "Welcome Window"
 
     def create(self):
-        global LIVE_SCREEN, WELCOME_SCREEN, CURRENT_SCREEN
+        global LIVE_WINDOW, WELCOME_WINDOW, CURRENT_WINDOW
         # Create first window (not hidden)
         with dpg.window(tag=self.tag(), show=True):
             dpg.add_text("This is the first window")
             dpg.add_button(label="change primary window",
-                           callback=lambda: change_window(LIVE_SCREEN))
+                           callback=lambda: change_window(LIVE_WINDOW))
 
 
 class LiveWindow(Window):
@@ -102,11 +102,11 @@ class LiveWindow(Window):
         return "Live Window"
 
     def create(self):
-        global LIVE_SCREEN, WELCOME_SCREEN, CURRENT_SCREEN
+        global LIVE_WINDOW, WELCOME_WINDOW, CURRENT_WINDOW
         # Create second window (hidden)
         with dpg.window(tag=self.tag(), show=False):
             dpg.add_text("This is the second window")
             dpg.add_button(label="change primary window",
-                           callback=lambda: change_window(WELCOME_SCREEN))
+                           callback=lambda: change_window(WELCOME_WINDOW))
 
 
