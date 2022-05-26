@@ -1,10 +1,14 @@
 from Testing import gui, cv2_testing, GUI_manager_test_1, GUI_manager_test_2
 
+from GUI import GUI_manager
 
 if __name__ == '__main__':
 
     # Start GUI and Display Welcome Window
-
+    GUI_manager.init_GUI()
+    GUI_manager.run_GUI()
+    GUI_manager.teardown_GUI()
+    exit()
     # GUI and window switching using method/organizational structure 1
     GUI_manager_test_2.init_GUI()
     GUI_manager_test_2.run_GUI()
