@@ -1,28 +1,17 @@
-from Testing import gui, cv2_testing, GUI_manager_test_1, GUI_manager_test_2
-
+from Testing import gui, cv2_testing
 from GUI import GUI_manager
 
 if __name__ == '__main__':
-
-    # Start GUI and Display Welcome Window
+    # Initialize GUI
     GUI_manager.init_GUI()
+    # Display Welcome Window
     GUI_manager.run_GUI()
+    # Perform teardown actions after user closing the GUI
     GUI_manager.teardown_GUI()
     exit()
-    # GUI and window switching using method/organizational structure 1
-    GUI_manager_test_2.init_GUI()
-    GUI_manager_test_2.run_GUI()
-    GUI_manager_test_2.teardown_GUI()
-    exit()
-
-    # GUI and window switching using method/organizational structure 2
-    GUI = GUI_manager_test_1.UI()
-    GUI.run()
-    GUI.teardown()
-
-    # TODO Camera selection (if multiple cameras, or use defaults etc. and settings/config files.)
 
     """ Initialize Hardware """
+    # TODO Camera selection (if multiple cameras, or use defaults etc. and settings/config files.)
     # Initialize Camera Capture
     capture = cv2_testing.initialize_capture(camera_index=0)
     # Initialize ADC

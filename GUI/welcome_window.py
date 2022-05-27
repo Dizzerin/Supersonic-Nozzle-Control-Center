@@ -9,7 +9,7 @@ class WelcomeWindow(IWindow):
         return "Welcome Window"
 
     def create(self):
-        # Create first window (not hidden)
+        # Build the window
         with dpg.window(tag=self.tag(), show=True):
             dpg.add_text("This is the Welcome window")
             dpg.add_button(label="change window",

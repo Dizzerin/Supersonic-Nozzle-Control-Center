@@ -1,4 +1,5 @@
 import dearpygui.dearpygui as dpg
+from GUI.window_interface import IWindow
 from GUI import welcome_window
 from GUI import live_window
 
@@ -51,7 +52,7 @@ def teardown_GUI():
     dpg.destroy_context()
 
 
-def change_window(to_window):
+def change_window(to_window: IWindow):
     """
     Used to change from one window to another (shows new window, sets it as primary, and hides the old)
     :param to_window: window object to set as the new primary and visible window
@@ -59,11 +60,11 @@ def change_window(to_window):
     """
     global CURRENT_WINDOW
     # Show new window
-    dpg.configure_item(to_window.tag(), show=True)
+    to_window.show()
     # Set it as the new main window
-    dpg.set_primary_window(to_window.tag(), True)
+    to_window.set_primary()
     # Hide the old window
-    dpg.configure_item(CURRENT_WINDOW.tag(), show=False)
+    CURRENT_WINDOW.hide()
     # Update current window global
     CURRENT_WINDOW = to_window
 

@@ -9,7 +9,7 @@ class LiveWindow(IWindow):
         return "Live Window"
 
     def create(self):
-        # Create second window (hidden)
+        # Build the window
         with dpg.window(tag=self.tag(), show=False):
             dpg.add_text("This is the Live Window")
             dpg.add_button(label="change window",
