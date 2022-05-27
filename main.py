@@ -2,6 +2,8 @@ from Testing import gui, cv2_testing
 from GUI import GUI_manager
 
 if __name__ == '__main__':
+
+
     # Initialize GUI
     GUI_manager.init_GUI()
     # Display Welcome Window
@@ -10,11 +12,6 @@ if __name__ == '__main__':
     GUI_manager.teardown_GUI()
     exit()
 
-    """ Initialize Hardware """
-    # TODO Camera selection (if multiple cameras, or use defaults etc. and settings/config files.)
-    # Initialize Camera Capture
-    capture = cv2_testing.initialize_capture(camera_index=0)
-    # Initialize ADC
 
     # Testing
     # cv2_testing.test_cv2()

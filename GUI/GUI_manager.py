@@ -15,6 +15,7 @@ def init_GUI():
     # Initialization for DPG
     dpg.create_context()
     dpg.create_viewport(title='Custom Title', width=1920, height=1080)
+    dpg.set_viewport_vsync(True) #TODO do we want this?
     dpg.setup_dearpygui()
     dpg.show_viewport()
     dpg.maximize_viewport()
@@ -43,9 +44,8 @@ def run_GUI():
     # Render Loop
     # (This replaces start_dearpygui() and runs every frame)
     while dpg.is_dearpygui_running():
-        # Update
-        # update_video(capture)
-        # update_plots()
+        # Call the current window's update function
+        CURRENT_WINDOW.update()
 
         # You can manually stop by using stop_dearpygui()
         dpg.render_dearpygui_frame()

@@ -12,6 +12,12 @@ class IWindow(ABC):
 
     @abstractmethod
     def create(self, viewport_width: int, viewport_height: int):
+        """
+        Method called to create/draw the window (place the UI elements etc.)
+        :param viewport_width: width of the viewport (passed in from GUI_manager)
+        :param viewport_height: height of the viewport (passed in from GUI_manager)
+        :return: None
+        """
         pass
 
     def show(self):
@@ -23,7 +29,11 @@ class IWindow(ABC):
     def set_primary(self):
         dpg.set_primary_window(self.tag(), True)
 
-    # @abstractmethod
-    # def update(self) -> Optional["IWindow"]:
-    #     pass
+    @abstractmethod
+    def update(self):
+        """
+        Method called every frame
+        :return: None
+        """
+        pass
 

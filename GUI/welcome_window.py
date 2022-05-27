@@ -9,6 +9,9 @@ class WelcomeWindow(IWindow):
     def tag() -> str:
         return "Welcome Window"
 
+    def update(self):
+        pass
+
     def create(self, viewport_width: int, viewport_height: int):
         # Local vars
         # Note: These are only used for the button on this screen
