@@ -8,7 +8,14 @@ class LiveWindow(IWindow):
     def tag() -> str:
         return "Live Window"
 
-    def create(self):
+    def create(self, viewport_width: int, viewport_height: int):
+        # Local vars
+
+
+        # Create textures which will later be added to the window
+
+
+
         # Build the window
         with dpg.window(tag=self.tag(), show=False):
             dpg.add_text("This is the Live Window")

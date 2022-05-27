@@ -14,18 +14,22 @@ def init_GUI():
 
     # Initialization for DPG
     dpg.create_context()
-    dpg.create_viewport(title='Custom Title', width=600, height=200)
+    dpg.create_viewport(title='Custom Title', width=1920, height=1080)
     dpg.setup_dearpygui()
     dpg.show_viewport()
     dpg.maximize_viewport()
+
+    # Get viewport width and height
+    viewport_width = dpg.get_viewport_client_width()
+    viewport_height = dpg.get_viewport_client_height()
 
     # Instantiate window classes
     LIVE_WINDOW = live_window.LiveWindow()
     WELCOME_WINDOW = welcome_window.WelcomeWindow()
 
     # Create windows
-    LIVE_WINDOW.create()
-    WELCOME_WINDOW.create()
+    LIVE_WINDOW.create(viewport_width, viewport_height)
+    WELCOME_WINDOW.create(viewport_width, viewport_height)
 
     # Set primary window
     dpg.set_primary_window(WELCOME_WINDOW.tag(), True)
