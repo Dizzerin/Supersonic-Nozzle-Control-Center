@@ -55,15 +55,6 @@ class InitializationWindow(IWindow):
             else:
                 self.camera_ready = True
 
-            # # Update progress bar
-            # count = dpg.get_value("Progress")
-            # count += 0.01
-            # dpg.set_value("Progress", count)
-            #
-            # # Once progress is 100%, go to live window
-            # if count == 100:
-            #     GUI_manager.change_window(GUI_manager.LIVE_WINDOW)
-
             if self.ADC_ready and self.camera_ready:
                 # GUI_manager.change_window(GUI_manager.LIVE_WINDOW)
                 pass
@@ -75,12 +66,11 @@ class InitializationWindow(IWindow):
         # Build the window
         with dpg.window(tag=self.tag, show=True):
             # Add title/subtitle text
-            dpg.add_text("Supersonic Nozzle Control Center 0.1.0", pos=[int(viewport_width / 2 - 150), title_y_start])
+            dpg.add_text("Supersonic Nozzle Control Center 0.1.0", pos=[int(viewport_width / 2 - 130), title_y_start])
             dpg.add_text("Initializing...", pos=[int(viewport_width / 2 - 50), title_y_start + 30])
-
-            dpg.add_progress_bar(tag="Progress", overlay="Status")
+            dpg.add_loading_indicator(pos=[int(viewport_width/2 - 20), title_y_start + 70])
 
             # TODO allow these elements to be dynamically added or unhidden
             # Note that the combo box needs to have a callback with sets try initialization to true whenever its selection is changed
-            dpg.add_combo(["Camera 1", "Camera 2"], label="Select which camera to use")
+            dpg.add_combo(["Camera 1", "Camera 2"], label="Select which camera to use", width=200)
             dpg.add_text("Warning, ADC could not be found/initialized!  Cannot continue!")
