@@ -30,21 +30,6 @@ def test_cv2():
     cv.destroyAllWindows()
 
 
-def initialize_capture(camera_index = 1):
-    # Create a capture from camera
-    # TODO use DSHOW only if windows (not linux) -- DSHOW is windows specific I think
-    capture = cv.VideoCapture(camera_index, cv.CAP_DSHOW)
-    # Check if camera stream could be opened/obtained
-    if not capture.isOpened():
-        print("Cannot open camera")
-        exit()
-    return capture
-
-
-def end_capture(capture):
-    capture.release()
-
-
 def print_lots_o_stuff(capture):
     print()
     print()
@@ -69,63 +54,3 @@ def print_lots_o_stuff(capture):
     # print("Temperature: " + str(capture.get(cv.CAP_PROP_TEMPERATURE)))
     # print("Saturation: " + str(capture.get(cv.CAP_PROP_SATURATION)))
     # input("hit key")
-
-
-def callback_autofocus(sender, data, user_data):
-    AF_enabled = dpg.get_value(sender)
-    capture = user_data
-
-    if AF_enabled:
-        # Update camera setting
-        capture.set(cv.CAP_PROP_AUTOFOCUS, 1)
-        # Set slider to 0
-        dpg.set_value("focus", value=0)
-        # Update slider enabled status
-        # dpg.disable_item("focus")
-    else:
-        # Update camera setting
-        capture.set(cv.CAP_PROP_AUTOFOCUS, 2)
-        # Update slider enabled status
-        # dpg.enable_item("focus")
-
-
-def update_focus(sender, data, user_data):
-    new_focus_value = dpg.get_value(sender)
-    capture = user_data
-    # TODO Focus must be: min: 0, max: 255, increment:5?
-    capture.set(cv.CAP_PROP_FOCUS, new_focus_value)
-    # Uncheck DearPyGui's AutoFocus checkbox (TODO probably should have this tie in with UI better --- pass in UI tag or something)
-    dpg.set_value("auto_focus", value=False)
-
-
-def update_brightness(sender, data, user_data):
-    new_brightness_value = dpg.get_value(sender)
-    capture = user_data
-    # TODO check range (or make sure limits on slider are appropriate)
-    # Set brightness value
-    capture.set(cv.CAP_PROP_BRIGHTNESS, new_brightness_value)
-
-
-def brightness_reset_callback(sender, data, user_data):
-    capture = user_data
-    # Reset brightness to 0
-    capture.set(cv.CAP_PROP_BRIGHTNESS, 0)
-    # Update DearPyGUI's slider value to match (TODO probably should have this tie in with UI better --- pass in UI tag or something)
-    dpg.set_value("brightness", value=0)
-
-
-def get_frame(capture):
-    # Capture frame-by-frame
-    successful_capture, frame = capture.read()
-    # if frame is read correctly ret is True
-    if not successful_capture:
-        print("Can't receive frame (stream end?). Exiting ...")
-
-    # convert to float 32 type (with RGB values ranging from 0-255) - Because this is the only format dearpygui will take
-    frame = np.float32(frame)
-    frame /= 255.
-
-    # convert to RGBA
-    rgba_frame = cv.cvtColor(frame, cv.COLOR_BGR2RGBA)
-
-    return rgba_frame

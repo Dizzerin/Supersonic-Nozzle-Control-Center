@@ -5,9 +5,12 @@ import dearpygui.dearpygui as dpg
 
 # Abstract base class which all windows implement
 class IWindow(ABC):
-    @staticmethod
     @abstractmethod
-    def tag() -> str:
+    def is_created(self) -> bool:
+        pass
+
+    @abstractmethod
+    def tag(self) -> str:
         pass
 
     @abstractmethod
@@ -21,13 +24,13 @@ class IWindow(ABC):
         pass
 
     def show(self):
-        dpg.configure_item(self.tag(), show=True)
+        dpg.configure_item(self.tag, show=True)
 
     def hide(self):
-        dpg.configure_item(self.tag(), show=False)
+        dpg.configure_item(self.tag, show=False)
 
     def set_primary(self):
-        dpg.set_primary_window(self.tag(), True)
+        dpg.set_primary_window(self.tag, True)
 
     @abstractmethod
     def update(self):

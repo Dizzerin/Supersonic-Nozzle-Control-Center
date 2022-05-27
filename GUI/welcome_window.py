@@ -1,13 +1,22 @@
 import dearpygui.dearpygui as dpg
-from GUI.window_interface import IWindow
+from Interfaces.window_interface import IWindow
 from GUI import GUI_manager
-from Testing import helper_functions
 
 
 class WelcomeWindow(IWindow):
-    @staticmethod
-    def tag() -> str:
-        return "Welcome Window"
+    def __init__(self):
+        # Call super class's init
+        super(WelcomeWindow, self).__init__()
+
+        # Local vars
+        self.is_created = False
+        self.tag = "Welcome Window"
+
+    def is_created(self) -> bool:
+        return self.is_created
+
+    def tag(self) -> str:
+        return self.tag
 
     def update(self):
         pass
@@ -30,7 +39,7 @@ class WelcomeWindow(IWindow):
             dpg.add_static_texture(width=width, height=height, default_value=data, tag="title_image")
 
         # Build the window
-        with dpg.window(tag=self.tag(), show=True):
+        with dpg.window(tag=self.tag, show=True):
 
             # Add title/logo image
             dpg.add_image("title_image", pos=[550, title_y_start])
@@ -44,10 +53,12 @@ class WelcomeWindow(IWindow):
             # Add buttons
             dpg.add_button(label="Live Session", width=button_width, height=button_height,
                            pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 0 * button_y_spacing],
-                           callback=lambda: GUI_manager.change_window(GUI_manager.LIVE_WINDOW))
+                           callback=lambda: GUI_manager.change_window(GUI_manager.INITIALIZATION_WINDOW))
             dpg.add_button(label="Settings", width=button_width, height=button_height,
                            pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 1 * button_y_spacing],
                            callback=lambda: GUI_manager.change_window(GUI_manager.LIVE_WINDOW))
             dpg.add_button(label="About", width=button_width, height=button_height,
                            pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 2 * button_y_spacing],
                            callback=lambda: GUI_manager.change_window(GUI_manager.LIVE_WINDOW))
+
+        self.is_created = True

@@ -1,21 +1,25 @@
 import dearpygui.dearpygui as dpg
-from GUI.window_interface import IWindow
+from Interfaces.window_interface import IWindow
+from Interfaces.camera_data_provider_interface import ICameraDataProvider
+from Interfaces.ADC_data_provider_interface import IADCDataProvider
 from GUI import welcome_window
 from GUI import live_window
+from GUI import initialization_window
 
 # Global variables (only used for the GUI)
+INITIALIZATION_WINDOW = None
 LIVE_WINDOW = None
 WELCOME_WINDOW = None
 CURRENT_WINDOW = None
 
 
-def init_GUI():
-    global LIVE_WINDOW, WELCOME_WINDOW, CURRENT_WINDOW
+def init_GUI(camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCDataProvider):
+    global INITIALIZATION_WINDOW, LIVE_WINDOW, WELCOME_WINDOW, CURRENT_WINDOW
 
     # Initialization for DPG
     dpg.create_context()
     dpg.create_viewport(title='Custom Title', width=1920, height=1080)
-    dpg.set_viewport_vsync(True) #TODO do we want this?
+    dpg.set_viewport_vsync(True)  # TODO do we want this?
     dpg.setup_dearpygui()
     dpg.show_viewport()
     dpg.maximize_viewport()
@@ -25,15 +29,15 @@ def init_GUI():
     viewport_height = dpg.get_viewport_client_height()
 
     # Instantiate window classes
-    LIVE_WINDOW = live_window.LiveWindow()
+    INITIALIZATION_WINDOW = initialization_window.InitializationWindow(camera_data_provider, ADC_data_provider)
+    LIVE_WINDOW = live_window.LiveWindow(camera_data_provider, ADC_data_provider)
     WELCOME_WINDOW = welcome_window.WelcomeWindow()
 
-    # Create windows
-    LIVE_WINDOW.create(viewport_width, viewport_height)
+    # Create first window
     WELCOME_WINDOW.create(viewport_width, viewport_height)
 
     # Set primary window
-    dpg.set_primary_window(WELCOME_WINDOW.tag(), True)
+    dpg.set_primary_window(WELCOME_WINDOW.tag, True)
     CURRENT_WINDOW = WELCOME_WINDOW
 
 
@@ -63,6 +67,14 @@ def change_window(to_window: IWindow):
     :return: None
     """
     global CURRENT_WINDOW
+    # If the to_window hasn't been created yet, create it
+    if not to_window.is_created:
+        # Get viewport width and height
+        viewport_width = dpg.get_viewport_client_width()
+        viewport_height = dpg.get_viewport_client_height()
+        # Create the window
+        to_window.create(viewport_width, viewport_height)
+
     # Show new window
     to_window.show()
     # Set it as the new main window

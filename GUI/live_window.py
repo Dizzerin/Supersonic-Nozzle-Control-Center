@@ -1,27 +1,23 @@
 import dearpygui.dearpygui as dpg
-from GUI.window_interface import IWindow
+from Interfaces.window_interface import IWindow
+from Interfaces.ADC_data_provider_interface import IADCDataProvider
+from Interfaces.camera_data_provider_interface import ICameraDataProvider
 from GUI import GUI_manager
 
-# TODO
-from Testing import cv2_testing
-import labjacktesting
+
+# TODO CURRENTLY HAVE AN ISSUE IN THE LIVE WINDOW (or with one of the devices it uses)
 
 
 class LiveWindow(IWindow):
-    def __init__(self, camera_capture=None):
+    def __init__(self, camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCDataProvider):
         # Call super class's init
         super(LiveWindow, self).__init__()
 
-        # TODO Do the below differently
-        self.capture = camera_capture
-        """ Initialize Hardware """
-        # TODO Camera selection (if multiple cameras, or use defaults etc. and settings/config files.)
-        # Initialize Camera Capture
-        self.capture = cv2_testing.initialize_capture(camera_index=0)
-        # Initialize ADC
-
         # Local vars
-        # TODO change the way this is handled, this should eventually be associated with a data class etc.
+        self.cam = camera_data_provider
+        self.ADC = ADC_data_provider
+        # TODO change the way this is handled?
+        # Plot sizing and data arrays
         # Global pressures and other plot data
         self.time_data = [0]
         self.axis_start_time = 0
@@ -35,13 +31,17 @@ class LiveWindow(IWindow):
         self.p3_y_data = []
         self.p4_y_data = []
         self.t0_y_data = []
+        self.is_created = False
+        self.tag = "Live Window"
 
-    @staticmethod
-    def tag() -> str:
-        return "Live Window"
+    def is_created(self) -> bool:
+        return self.is_created
+
+    def tag(self) -> str:
+        return self.tag
 
     def _update_video(self):
-        raw_data = cv2_testing.get_frame(self.capture)
+        raw_data = self.cam.get_next_frame()
         dpg.set_value("texture_tag", raw_data)
 
     def _update_plot(self, series_tag, x_axis_tag, y_data):
@@ -61,13 +61,13 @@ class LiveWindow(IWindow):
             self.axis_end_time += 1
 
         # Read new data from ADC
-        labjack_data = labjacktesting.read_ADC()
-        self.p0_y_data.append(labjack_data.p0)
-        self.p1_y_data.append(labjack_data.p1)
-        self.p2_y_data.append(labjack_data.p2)
-        self.p3_y_data.append(labjack_data.p3)
-        self.p4_y_data.append(labjack_data.p4)
-        self.t0_y_data.append(labjack_data.t0)
+        ADC_data = self.ADC.get_next_data_row()
+        self.p0_y_data.append(ADC_data.p0)
+        self.p1_y_data.append(ADC_data.p1)
+        self.p2_y_data.append(ADC_data.p2)
+        self.p3_y_data.append(ADC_data.p3)
+        self.p4_y_data.append(ADC_data.p4)
+        self.t0_y_data.append(ADC_data.t0)
 
         # Update plots
         self._update_plot("p0_series", "p0_x_axis", self.p0_y_data)
@@ -83,14 +83,14 @@ class LiveWindow(IWindow):
 
     def create(self, viewport_width: int, viewport_height: int):
         # Local vars
-        raw_data = cv2_testing.get_frame(self.capture)
+        raw_data = self.cam.get_next_frame()
 
         # Create textures which will later be added to the window
         with dpg.texture_registry(show=False):
             dpg.add_raw_texture(640, 480, raw_data, format=dpg.mvFormat_Float_rgba, tag="texture_tag")
 
         # Build the window
-        with dpg.window(tag=self.tag(), show=False):
+        with dpg.window(tag=self.tag, show=False):
             dpg.add_button(label="Home", callback=lambda: GUI_manager.change_window(GUI_manager.WELCOME_WINDOW))
 
             # Master group to divide window into two columns
@@ -102,8 +102,8 @@ class LiveWindow(IWindow):
 
                     # Autofocus checkbox
                     with dpg.group(horizontal=True):
-                        dpg.add_checkbox(label="Auto Focus", default_value=True, user_data=self.capture,
-                                         callback=cv2_testing.callback_autofocus, tag="auto_focus")
+                        dpg.add_checkbox(label="Auto Focus", default_value=True, user_data="auto_focus",
+                                         callback=self.cam.set_autofocus_callback, tag="auto_focus")
                         # dpg.add_checkbox(label="Auto Exposure")
 
                     # Focus and brightness sliders
@@ -111,14 +111,15 @@ class LiveWindow(IWindow):
                         # Todo Verify range
                         dpg.add_slider_int(label="Focus", tag="focus", vertical=False, default_value=0, min_value=0,
                                            max_value=1012,
-                                           clamped=True, width=100, user_data=self.capture, callback=cv2_testing.update_focus)
+                                           clamped=True, width=100, user_data="focus",
+                                           callback=self.cam.set_focus_callback)
                         # dpg.add_spacer(width=100)
                         dpg.add_slider_int(label="Brightness", tag="brightness", vertical=False, default_value=0,
                                            min_value=-64,
-                                           max_value=64, width=100, clamped=True, user_data=self.capture,
-                                           callback=cv2_testing.update_brightness)
-                        dpg.add_button(label="Reset brightness", user_data=self.capture,
-                                       callback=cv2_testing.brightness_reset_callback)
+                                           max_value=64, width=100, clamped=True, user_data="brightness",
+                                           callback=self.cam.set_brightness_callback)
+                        dpg.add_button(label="Reset brightness", user_data="Reset brightness",
+                                       callback=self.cam.reset_brightness_callback)
 
                 # Right-hand side group
                 with dpg.group(horizontal=False) as right_group:
@@ -185,5 +186,3 @@ class LiveWindow(IWindow):
                             dpg.add_theme_style(dpg.mvPlotStyleVar_PlotPadding, 10)
                             dpg.add_theme_style(dpg.mvPlotStyleVar_LabelPadding, 10)
                     dpg.bind_item_theme(plot_group, plot_group_container_theme)
-
-
