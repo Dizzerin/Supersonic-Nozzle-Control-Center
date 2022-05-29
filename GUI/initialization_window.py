@@ -1,10 +1,9 @@
-import time
-
 import dearpygui.dearpygui as dpg
 from Interfaces.window_interface import IWindow
 from GUI import GUI_manager
 from Interfaces.camera_data_provider_interface import ICameraDataProvider
 from Interfaces.ADC_data_provider_interface import IADCDataProvider
+import time
 
 
 class InitializationWindow(IWindow):
@@ -18,13 +17,13 @@ class InitializationWindow(IWindow):
         self.available_cameras = []
         self.camera_index = None
         self.is_created = False
-        self.tag = "Init Window"
         self.ADC_ready = False
         self.camera_ready = False
         self.try_initialization = True
         self.num_update_calls = 0
 
         # UI element tags
+        self.tag = "Init Window"
         self.no_ADC_warning_tag = "ADC_warning"
         self.no_cam_warning_tag = "camera_warning"
         self.multi_cam_avail_tag = "multi_cam_text"
@@ -99,8 +98,7 @@ class InitializationWindow(IWindow):
         # Once everything is ready, proceed to live session window
         if self.ADC_ready and self.camera_ready:
             # TODO this doesn't work, fix this bug!
-            # GUI_manager.change_window(GUI_manager.LIVE_WINDOW)
-            pass
+            GUI_manager.change_window(GUI_manager.LIVE_WINDOW)
 
     def create(self, viewport_width: int, viewport_height: int):
         # Include title bar on this screen

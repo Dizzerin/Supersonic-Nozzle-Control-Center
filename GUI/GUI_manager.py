@@ -7,6 +7,8 @@ from GUI import live_window
 from GUI import initialization_window
 
 # Global variables (only used for the GUI)
+# TODO maybe later make these not globals (create these windows in init function, return them, and pass them into the
+# constructor of any other windows that need to use these (i.e. next_window)
 INITIALIZATION_WINDOW = None
 LIVE_WINDOW = None
 WELCOME_WINDOW = None
@@ -50,8 +52,12 @@ def run_GUI():
     while dpg.is_dearpygui_running():
         # Render next frame
         dpg.render_dearpygui_frame()
+
+        last_window = CURRENT_WINDOW
         # Call the current window's update function
-        CURRENT_WINDOW.update()
+        last_window.update()
+        if CURRENT_WINDOW is not last_window:
+            CURRENT_WINDOW.update()
 
 
 def teardown_GUI():

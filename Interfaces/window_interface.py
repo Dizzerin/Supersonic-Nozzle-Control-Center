@@ -41,4 +41,3 @@ class IWindow(ABC):
         :return: None
         """
         pass
-
