@@ -8,7 +8,7 @@ class ICameraDataProvider(ABC):
     #     pass
 
     @abstractmethod
-    def get_available_cameras(self) -> List[str]:
+    def get_available_cameras(self) -> List[int]:
         pass
 
     @abstractmethod
@@ -30,20 +30,16 @@ class ICameraDataProvider(ABC):
 
     @abstractmethod
     def set_focus_callback(self, sender, data, user_data):
-        # Note: user_data should be the tag of the associated UI element
         pass
 
     @abstractmethod
     def set_brightness_callback(self, sender, data, user_data):
-        # Note: user_data should be the tag of the associated UI element
         pass
 
     @abstractmethod
     def reset_brightness_callback(self, sender, data, user_data):
-        # Note: user_data should be the tag of the associated UI element
         pass
 
     @abstractmethod
     def set_autofocus_callback(self, sender, data, user_data):
-        # Note: user_data should be the tag of the associated UI element
         pass

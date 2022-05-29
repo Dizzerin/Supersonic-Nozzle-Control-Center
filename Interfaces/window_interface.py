@@ -24,6 +24,8 @@ class IWindow(ABC):
         pass
 
     def show(self):
+        # TODO maybe require variable on each class that specifies whether to include title bar and then use that here
+        # to ensure it is updated based on the screen's desire
         dpg.configure_item(self.tag, show=True)
 
     def hide(self):

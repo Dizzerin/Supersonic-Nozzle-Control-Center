@@ -18,7 +18,7 @@ def init_GUI(camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCD
 
     # Initialization for DPG
     dpg.create_context()
-    dpg.create_viewport(title='Custom Title', width=1920, height=1080)
+    dpg.create_viewport(title="Supersonic Nozzle Control Center", width=1920, height=1080)
     dpg.set_viewport_vsync(True)  # TODO do we want this?
     dpg.setup_dearpygui()
     dpg.show_viewport()
@@ -37,7 +37,7 @@ def init_GUI(camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCD
     WELCOME_WINDOW.create(viewport_width, viewport_height)
 
     # Set primary window
-    dpg.set_primary_window(WELCOME_WINDOW.tag, True)
+    WELCOME_WINDOW.set_primary()
     CURRENT_WINDOW = WELCOME_WINDOW
 
 
@@ -48,16 +48,28 @@ def run_GUI():
     # Render Loop
     # (This replaces start_dearpygui() and runs every frame)
     while dpg.is_dearpygui_running():
+        # Render next frame
+        dpg.render_dearpygui_frame()
         # Call the current window's update function
         CURRENT_WINDOW.update()
 
-        # You can manually stop by using stop_dearpygui()
-        dpg.render_dearpygui_frame()
-
 
 def teardown_GUI():
+    # TODO save files etc? (decide where to do that and organize it)
+
     # Stop DPG
+    dpg.stop_dearpygui()
     dpg.destroy_context()
+
+
+def enable_title_bar():
+    dpg.set_viewport_decorated(True)
+    dpg.maximize_viewport()
+
+
+def disable_title_bar():
+    dpg.set_viewport_decorated(False)
+    dpg.maximize_viewport()
 
 
 def change_window(to_window: IWindow):
@@ -75,13 +87,13 @@ def change_window(to_window: IWindow):
         # Create the window
         to_window.create(viewport_width, viewport_height)
 
-    # Show new window
-    to_window.show()
-    # Set it as the new main window
-    to_window.set_primary()
-    # Hide the old window
-    CURRENT_WINDOW.hide()
-    # Update current window global
-    CURRENT_WINDOW = to_window
-
-
+    # Ensure these all occur in the same frame
+    with dpg.mutex():
+        # Show new window
+        to_window.show()
+        # Set it as the new main window
+        to_window.set_primary()
+        # Hide the old window
+        CURRENT_WINDOW.hide()
+        # Update current window global
+        CURRENT_WINDOW = to_window

@@ -5,10 +5,10 @@ import numpy as np
 import cv2 as cv
 
 
-class MyCamera(ICameraDataProvider):
+class PCBCamera(ICameraDataProvider):
     def __init__(self):
         # Call super class's init
-        super(MyCamera, self).__init__()
+        super(PCBCamera, self).__init__()
 
         # Local vars
         self.is_ready = False
@@ -18,9 +18,26 @@ class MyCamera(ICameraDataProvider):
         # Initialize PCB Camera Capture
         self.capture = None
 
-    def get_available_cameras(self) -> List[str]:
-        # TODO
-        pass
+    def get_available_cameras(self) -> List[int]:
+        # Iterates through the first 10 indexes
+        #   Tries to start a capture with each one, if it works,
+        #   it adds that camera index to the list of valid camera indexes.
+        #   Note: Sometimes a camera may be at index 0, none on 1, and then another one on 2
+        #   i.e. there can be emtpy indexes between valid cameras
+        #   This method may seem clunky, but this is the best way right now that is os
+        #   independent that I could find online
+        # TODO THIS ROUTINE TAKES FAR TOO LONG
+        index = 0
+        arr = []
+        i = 10
+        while i > 0:
+            cap = cv.VideoCapture(index)
+            if cap.read()[0]:
+                arr.append(index)
+                cap.release()
+            index += 1
+            i -= 1
+        return arr
 
     def initialize_capture(self, camera_index: int):
         self.camera_index = camera_index
@@ -58,34 +75,30 @@ class MyCamera(ICameraDataProvider):
         return rgba_frame
 
     def set_focus_callback(self, sender, data, user_data):
-        # Note: user_data should be the tag of the associated UI element
-        new_focus_value = dpg.get_value(sender)
-        tag = user_data
+        tag = sender
+        new_focus_value = dpg.get_value(tag)
         # TODO Focus must be: min: 0, max: 255, increment:5?
         self.capture.set(cv.CAP_PROP_FOCUS, new_focus_value)
         # Uncheck DearPyGui's AutoFocus checkbox
         dpg.set_value(tag, value=False)
 
     def set_brightness_callback(self, sender, data, user_data):
-        # Note: user_data should be the tag of the associated UI element
-        new_brightness_value = dpg.get_value(sender)
-        tag = user_data
+        tag = sender
+        new_brightness_value = dpg.get_value(tag)
         # TODO check range (or make sure limits on slider are appropriate)
         # Set brightness value
         self.capture.set(cv.CAP_PROP_BRIGHTNESS, new_brightness_value)
 
     def reset_brightness_callback(self, sender, data, user_data):
-        # Note: user_data should be the tag of the associated UI element
-        tag = user_data
+        tag = sender
         # Reset brightness to 0
         self.capture.set(cv.CAP_PROP_BRIGHTNESS, 0)
         # Update DearPyGUI's slider value to match
         dpg.set_value(tag, value=0)
 
     def set_autofocus_callback(self, sender, data, user_data):
-        # Note: user_data should be the tag of the associated UI element
-        self.AF_enabled = dpg.get_value(sender)
-        tag = user_data
+        tag = sender
+        self.AF_enabled = dpg.get_value(tag)
 
         if self.AF_enabled:
             # Update camera setting

@@ -1,12 +1,12 @@
 from Testing import cv2_testing
-from Hardware_Libraries.camera_myCam import MyCamera
+from Hardware_Libraries.camera_PCB_cam import PCBCamera
 from Hardware_Libraries.ADC_labjack import Ue9LabjackADC
 from GUI import GUI_manager
 
 if __name__ == '__main__':
 
     # Instantiate data providers
-    camera_data_provider = MyCamera()
+    camera_data_provider = PCBCamera()
     ADC_data_provider = Ue9LabjackADC()
 
     # Initialize GUI
@@ -15,14 +15,3 @@ if __name__ == '__main__':
     GUI_manager.run_GUI()
     # Perform teardown actions after user closing the GUI
     GUI_manager.teardown_GUI()
-    exit()
-
-
-    # Testing
-    # cv2_testing.test_cv2()
-
-    """ Teardown """
-    # Stop Camera Capture
-    cv2_testing.end_capture(capture)
-
-exit()

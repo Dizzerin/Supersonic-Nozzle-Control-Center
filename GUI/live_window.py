@@ -16,6 +16,7 @@ class LiveWindow(IWindow):
         # Local vars
         self.cam = camera_data_provider
         self.ADC = ADC_data_provider
+
         # TODO change the way this is handled?
         # Plot sizing and data arrays
         # Global pressures and other plot data
@@ -32,7 +33,14 @@ class LiveWindow(IWindow):
         self.p4_y_data = []
         self.t0_y_data = []
         self.is_created = False
+
+        # UI element tags
         self.tag = "Live Window"
+        self.video_texture_tag = "texture_tag"
+        self.focus_slider_tag = "focus_slider_tag"
+        self.AF_enable_button_tag = "AF_enable_button_tag"
+        self.brightness_slider_tag = "brightness_slider_tag"
+        self.reset_brightness_tag = "reset_brightness"
 
     def is_created(self) -> bool:
         return self.is_created
@@ -42,7 +50,7 @@ class LiveWindow(IWindow):
 
     def _update_video(self):
         raw_data = self.cam.get_next_frame()
-        dpg.set_value("texture_tag", raw_data)
+        dpg.set_value(self.video_texture_tag, raw_data)
 
     def _update_plot(self, series_tag, x_axis_tag, y_data):
         # "Scroll" x-axis
@@ -52,8 +60,6 @@ class LiveWindow(IWindow):
         dpg.set_value(series_tag, [self.time_data, y_data])
 
     def _update_plots(self):
-        # TODO don't use global data
-
         # Update time and pressure and temperature values
         self.time_data.append(self.time_data[-1] + 1)
         if len(self.time_data) >= self.axis_end_time:
@@ -87,7 +93,7 @@ class LiveWindow(IWindow):
 
         # Create textures which will later be added to the window
         with dpg.texture_registry(show=False):
-            dpg.add_raw_texture(640, 480, raw_data, format=dpg.mvFormat_Float_rgba, tag="texture_tag")
+            dpg.add_raw_texture(640, 480, raw_data, format=dpg.mvFormat_Float_rgba, tag=self.video_texture_tag)
 
         # Build the window
         with dpg.window(tag=self.tag, show=False):
@@ -98,27 +104,29 @@ class LiveWindow(IWindow):
                 # Left-hand side group
                 with dpg.group(horizontal=False) as left_group:
                     # Video feed
-                    dpg.add_image("texture_tag")
+                    dpg.add_image(self.video_texture_tag)
 
                     # Autofocus checkbox
                     with dpg.group(horizontal=True):
-                        dpg.add_checkbox(label="Auto Focus", default_value=True, user_data="auto_focus",
-                                         callback=self.cam.set_autofocus_callback, tag="auto_focus")
+                        dpg.add_checkbox(label="Auto Focus", default_value=True,
+                                         callback=self.cam.set_autofocus_callback, tag=self.AF_enable_button_tag)
                         # dpg.add_checkbox(label="Auto Exposure")
 
                     # Focus and brightness sliders
                     with dpg.group(horizontal=False):
                         # Todo Verify range
-                        dpg.add_slider_int(label="Focus", tag="focus", vertical=False, default_value=0, min_value=0,
+                        dpg.add_slider_int(label="Focus", tag=self.focus_slider_tag, vertical=False, default_value=0,
+                                           min_value=0,
                                            max_value=1012,
-                                           clamped=True, width=100, user_data="focus",
+                                           clamped=True, width=100,
                                            callback=self.cam.set_focus_callback)
                         # dpg.add_spacer(width=100)
-                        dpg.add_slider_int(label="Brightness", tag="brightness", vertical=False, default_value=0,
+                        dpg.add_slider_int(label="Brightness", tag=self.brightness_slider_tag, vertical=False,
+                                           default_value=0,
                                            min_value=-64,
-                                           max_value=64, width=100, clamped=True, user_data="brightness",
+                                           max_value=64, width=100, clamped=True,
                                            callback=self.cam.set_brightness_callback)
-                        dpg.add_button(label="Reset brightness", user_data="Reset brightness",
+                        dpg.add_button(label="Reset brightness", tag=self.reset_brightness_tag,
                                        callback=self.cam.reset_brightness_callback)
 
                 # Right-hand side group
@@ -186,3 +194,6 @@ class LiveWindow(IWindow):
                             dpg.add_theme_style(dpg.mvPlotStyleVar_PlotPadding, 10)
                             dpg.add_theme_style(dpg.mvPlotStyleVar_LabelPadding, 10)
                     dpg.bind_item_theme(plot_group, plot_group_container_theme)
+
+        # Indicate that this window has been created
+        self.is_created = True
