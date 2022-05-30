@@ -50,7 +50,7 @@ class WelcomeWindow(IWindow):
                                   width=settings_combo_box_width)
 
             dpg.add_spacer(height=20)
-            dpg.add_text("ADC analog input mapping:")
+            dpg.add_text("ADC Input Mapping:")
             with dpg.table(header_row=False, resizable=False, borders_innerH=False, borders_outerH=False,
                            borders_innerV=False, borders_outerV=False):
                 dpg.add_table_column(init_width_or_weight=settings_text_width, width_fixed=True)
@@ -59,16 +59,29 @@ class WelcomeWindow(IWindow):
                 #   Load defaults from config file
                 #   Save results to config file
                 with dpg.table_row():
-                    dpg.add_text("Temperature 0:")
+                    dpg.add_text("Temperature 0:", tag="t0")
                     dpg.add_combo(["ADC" + str(n) for n in range(0, 11)], label="Input",
                                   default_value="ADC0",
                                   width=settings_combo_box_width)
                 for i in range(0, 5):
                     with dpg.table_row():
-                        dpg.add_text("Pressure {}:".format(i))
+                        dpg.add_text("Pressure {}:".format(i), tag="p{}".format(i))
                         dpg.add_combo(["ADC" + str(n) for n in range(0, 11)], label="Input",
                                       default_value="ADC{}".format(i+1),
                                       width=settings_combo_box_width)
+
+                # Add tooltips to temperature and pressure text
+                # plot_tags = ["t0", "p0", "p1", "p2", "p3", "p4"]
+                descriptions = {"t0": "Temperature inside the tank (stagnation temperature)",
+                                "p0": "Pressure inside the tank (stagnation pressure)",
+                                "p1": "Pressure upstream of the throat",
+                                "p2": "Pressure at the throat",
+                                "p3": "Pressure just downstream of the throat",
+                                "p4": "Pressure just upstream of the exit"
+                                }
+                for key, value in descriptions.items():
+                    with dpg.tooltip(parent=key):
+                        dpg.add_text(value)
 
             dpg.add_spacer(height=20)
             dpg.add_text("Welcome Screen Background:")
@@ -84,7 +97,7 @@ class WelcomeWindow(IWindow):
                 dpg.add_text("(width x height)")
 
             dpg.add_spacer(height=20)
-            dpg.add_text("Default save location:")
+            dpg.add_text("Default Save Location:")
             dpg.add_file_dialog(label="Select default save location", tag="select", show=False)
             dpg.add_button(label="Select", tag="open_select_window", callback=lambda: dpg.configure_item("select", show=True))
 

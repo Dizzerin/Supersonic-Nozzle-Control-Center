@@ -144,12 +144,12 @@ class LiveWindow(IWindow):
                         button_height = 35
                         button_x_spacing = 300
                         with dpg.group(horizontal=True):
-                            dpg.add_button(label="Start Recording", width=button_width, height=button_height,
-                                           pos=[button_x_start + button_x_spacing*0, button_y],
-                                           tag=self.recording_button_tag)
                             dpg.add_button(label="Calibrate Sensors", width=button_width, height=button_height,
-                                           pos=[button_x_start + button_x_spacing*1, button_y],
+                                           pos=[button_x_start + button_x_spacing*0, button_y],
                                            tag=self.calibrate_button_tag)
+                            dpg.add_button(label="Start Recording", width=button_width, height=button_height,
+                                           pos=[button_x_start + button_x_spacing*1, button_y],
+                                           tag=self.recording_button_tag)
 
                 # Right-hand side group
                 with dpg.group(horizontal=False, pos=[viewport_width // 2 + 80, 60]) as right_group:
@@ -209,6 +209,18 @@ class LiveWindow(IWindow):
                             with dpg.plot_axis(dpg.mvYAxis, label="(Kelvin)", tag="t0_y_axis"):
                                 # Create line_series plots
                                 dpg.add_line_series(self.time_data, [], label="Temperature 0", tag="t0_series")
+
+                    # Add tooltips to temperature and pressure text
+                    descriptions = {"t0_y_axis": "Temperature inside the tank (stagnation temperature)",
+                                    "p0_y_axis": "Pressure inside the tank (stagnation pressure)",
+                                    "p1_y_axis": "Pressure upstream of the throat",
+                                    "p2_y_axis": "Pressure at the throat",
+                                    "p3_y_axis": "Pressure just downstream of the throat",
+                                    "p4_y_axis": "Pressure just upstream of the exit"
+                                    }
+                    for key, value in descriptions.items():
+                        with dpg.tooltip(parent=key):
+                            dpg.add_text(value)
 
                     # Make "Live Data" label/title of the plot group look nicer
                     #   Set PlotPadding to 7 and LabelPadding to 11
