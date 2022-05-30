@@ -10,7 +10,6 @@ class WelcomeWindow(IWindow):
 
         # Local vars
         self.is_created = False
-        self.tag = "Welcome Window"
 
         # TODO create rounded transparent button style and apply to buttons on this screen
 
@@ -18,15 +17,15 @@ class WelcomeWindow(IWindow):
         return self.is_created
 
     def tag(self) -> str:
-        return self.tag
+        return "Welcome Window"
+
+    def include_title_bar(self) -> bool:
+        return False
 
     def update(self):
         pass
 
     def create(self, viewport_width: int, viewport_height: int):
-        # Don't include title bar on this screen
-        GUI_manager.disable_title_bar()
-
         # Local vars
         # Note: These are only used for the button on this screen
         # Todo maybe implement some of this as a style and make the text larger and apply the style to these buttons instead
@@ -46,7 +45,7 @@ class WelcomeWindow(IWindow):
             dpg.add_static_texture(width=width2, height=height2, default_value=data2, tag="background_image")
 
         # Build the window
-        with dpg.window(tag=self.tag, show=True):
+        with dpg.window(tag=self.tag(), show=True):
 
             # Add background image
             dpg.add_image("background_image", pos=[0, 0])
@@ -70,10 +69,9 @@ class WelcomeWindow(IWindow):
             dpg.add_button(label="About", width=button_width, height=button_height,
                            pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 2 * button_y_spacing],
                            callback=lambda: GUI_manager.change_window(GUI_manager.LIVE_WINDOW))
-            # TODO figure out how to exit without exit code
             dpg.add_button(label="Exit", width=button_width, height=button_height,
                            pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 3 * button_y_spacing],
-                           callback=GUI_manager.teardown_GUI)
+                           callback=dpg.stop_dearpygui)
 
         # Indicate that this window has been created
         self.is_created = True

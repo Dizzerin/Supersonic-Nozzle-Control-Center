@@ -8,7 +8,8 @@ from GUI import initialization_window
 
 # Global variables (only used for the GUI)
 # TODO maybe later make these not globals (create these windows in init function, return them, and pass them into the
-# constructor of any other windows that need to use these (i.e. next_window)
+#   constructor of any other windows that need to use these (i.e. next_window)
+#   this would also make it so the create functions wouldn't be needed and could be done inside the concrete class's init
 INITIALIZATION_WINDOW = None
 LIVE_WINDOW = None
 WELCOME_WINDOW = None
@@ -21,7 +22,7 @@ def init_GUI(camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCD
     # Initialization for DPG
     dpg.create_context()
     dpg.create_viewport(title="Supersonic Nozzle Control Center", width=1920, height=1080)
-    dpg.set_viewport_vsync(True)  # TODO do we want this?
+    dpg.set_viewport_vsync(True)  # Match display's refresh rate
     dpg.setup_dearpygui()
     dpg.show_viewport()
     dpg.maximize_viewport()
@@ -44,38 +45,26 @@ def init_GUI(camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCD
 
 
 def run_GUI():
-    # Start DPG
-    # dpg.start_dearpygui()
-
     # Render Loop
     # (This replaces start_dearpygui() and runs every frame)
     while dpg.is_dearpygui_running():
         # Render next frame
         dpg.render_dearpygui_frame()
 
-        last_window = CURRENT_WINDOW
-        # Call the current window's update function
-        last_window.update()
-        if CURRENT_WINDOW is not last_window:
+        # Save present window
+        present_window = CURRENT_WINDOW
+
+        # Call the present window's update function
+        present_window.update()  # Note: this function could change the current window global
+
+        # When switching windows call the new window's update function
+        if CURRENT_WINDOW is not present_window:
             CURRENT_WINDOW.update()
 
 
 def teardown_GUI():
     # TODO save files etc? (decide where to do that and organize it)
-
-    # Stop DPG
-    dpg.stop_dearpygui()
     dpg.destroy_context()
-
-
-def enable_title_bar():
-    dpg.set_viewport_decorated(True)
-    dpg.maximize_viewport()
-
-
-def disable_title_bar():
-    dpg.set_viewport_decorated(False)
-    dpg.maximize_viewport()
 
 
 def change_window(to_window: IWindow):

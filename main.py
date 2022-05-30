@@ -1,4 +1,3 @@
-from Testing import cv2_testing
 from Hardware_Libraries.camera_PCB_cam import PCBCamera
 from Hardware_Libraries.ADC_labjack import Ue9LabjackADC
 from GUI import GUI_manager

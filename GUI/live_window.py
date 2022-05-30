@@ -5,9 +5,6 @@ from Interfaces.camera_data_provider_interface import ICameraDataProvider
 from GUI import GUI_manager
 
 
-# TODO CURRENTLY HAVE AN ISSUE IN THE LIVE WINDOW (or with one of the devices it uses)
-
-
 class LiveWindow(IWindow):
     def __init__(self, camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCDataProvider):
         # Call super class's init
@@ -35,7 +32,6 @@ class LiveWindow(IWindow):
         self.is_created = False
 
         # UI element tags
-        self.tag = "Live Window"
         self.video_texture_tag = "texture_tag"
         self.focus_slider_tag = "focus_slider_tag"
         self.AF_enable_button_tag = "AF_enable_button_tag"
@@ -46,7 +42,10 @@ class LiveWindow(IWindow):
         return self.is_created
 
     def tag(self) -> str:
-        return self.tag
+        return "Live Window"
+
+    def include_title_bar(self) -> bool:
+        return True
 
     def _update_video(self):
         raw_data = self.cam.get_next_frame()
@@ -96,7 +95,7 @@ class LiveWindow(IWindow):
             dpg.add_raw_texture(640, 480, raw_data, format=dpg.mvFormat_Float_rgba, tag=self.video_texture_tag)
 
         # Build the window
-        with dpg.window(tag=self.tag, show=False):
+        with dpg.window(tag=self.tag(), show=False):
             dpg.add_button(label="Home", callback=lambda: GUI_manager.change_window(GUI_manager.WELCOME_WINDOW))
 
             # Master group to divide window into two columns
@@ -109,6 +108,7 @@ class LiveWindow(IWindow):
                     # Autofocus checkbox
                     with dpg.group(horizontal=True):
                         dpg.add_checkbox(label="Auto Focus", default_value=True,
+                                         user_data=self.focus_slider_tag,
                                          callback=self.cam.set_autofocus_callback, tag=self.AF_enable_button_tag)
                         # dpg.add_checkbox(label="Auto Exposure")
 
@@ -119,6 +119,7 @@ class LiveWindow(IWindow):
                                            min_value=0,
                                            max_value=1012,
                                            clamped=True, width=100,
+                                           user_data=self.AF_enable_button_tag,
                                            callback=self.cam.set_focus_callback)
                         # dpg.add_spacer(width=100)
                         dpg.add_slider_int(label="Brightness", tag=self.brightness_slider_tag, vertical=False,
@@ -127,6 +128,7 @@ class LiveWindow(IWindow):
                                            max_value=64, width=100, clamped=True,
                                            callback=self.cam.set_brightness_callback)
                         dpg.add_button(label="Reset brightness", tag=self.reset_brightness_tag,
+                                       user_data=self.brightness_slider_tag,
                                        callback=self.cam.reset_brightness_callback)
 
                 # Right-hand side group

@@ -23,17 +23,20 @@ class InitializationWindow(IWindow):
         self.num_update_calls = 0
 
         # UI element tags
-        self.tag = "Init Window"
         self.no_ADC_warning_tag = "ADC_warning"
         self.no_cam_warning_tag = "camera_warning"
         self.multi_cam_avail_tag = "multi_cam_text"
         self.camera_combo_select_tag = "combo"
+        self.exit_button_tag = "exit_button"
 
     def is_created(self) -> bool:
         return self.is_created
 
     def tag(self) -> str:
-        return self.tag
+        return "Init Window"
+
+    def include_title_bar(self) -> bool:
+        return True
 
     def update(self):
         """ The first call to this function occurs before the window is even draw and some initialization steps
@@ -45,6 +48,11 @@ class InitializationWindow(IWindow):
         should really be performed is on the second call to this function.
         Update: It actually seems to yield a smoother UI experience if the body is run on the third update call.
         # todo and maybe when the user makes a change?  But maybe that should be handled in callbacks instead
+        # todo make it so the initialization gets tried again each time the screen is changed to this screen
+        #   i.e. when it doesn't work the first try, someone goes back home, changes a setting, and then
+        #   comes back to this screen to try again
+        # todo test multi-camera available code and no camera available code (using test camera class)
+        # todo make sure initialization gets tried again when the user selects a camera to use
         """
         self.num_update_calls += 1
 
@@ -57,7 +65,7 @@ class InitializationWindow(IWindow):
             if not self.ADC_provider.is_ready:
                 # Show no ADC warning text
                 dpg.configure_item(self.no_ADC_warning_tag, show=True)
-                # TODO add back/home button and exit button and show them in this case
+                dpg.configure_item(self.exit_button_tag, show=True)
             else:
                 self.ADC_ready = True
 
@@ -79,7 +87,7 @@ class InitializationWindow(IWindow):
                 if len(self.available_cameras) == 0:
                     # Show no camera warning text
                     dpg.configure_item(self.no_cam_warning_tag, show=True)
-                    # TODO add back/home button and exit button and show them in this case
+                    dpg.configure_item(self.exit_button_tag, show=True)
                 elif len(self.available_cameras) == 1:
                     # Use the only available camera (This code will run if only 1 camera is available and it is not the default one in the settings file)
                     self.camera_index = self.available_cameras[0]
@@ -97,18 +105,17 @@ class InitializationWindow(IWindow):
 
         # Once everything is ready, proceed to live session window
         if self.ADC_ready and self.camera_ready:
-            # TODO this doesn't work, fix this bug!
             GUI_manager.change_window(GUI_manager.LIVE_WINDOW)
 
     def create(self, viewport_width: int, viewport_height: int):
-        # Include title bar on this screen
-        GUI_manager.enable_title_bar()
-
         # Local vars
         title_y_start = 80
+        button_y_start = title_y_start + 210
+        button_width = 150
+        button_height = 35
 
         # Build the window
-        with dpg.window(tag=self.tag, show=True):
+        with dpg.window(tag=self.tag(), show=True):
             # TODO Verify positioning of all objects on this window
 
             dpg.add_button(label="Home", callback=lambda: GUI_manager.change_window(GUI_manager.WELCOME_WINDOW))
@@ -120,20 +127,24 @@ class InitializationWindow(IWindow):
 
             # ADC warning (hidden by default)
             dpg.add_text("Warning, ADC unit could not be found/initialized!  Cannot continue!",
-                         tag=self.no_ADC_warning_tag, pos=[int(viewport_width / 2 - 100), title_y_start + 90], show=False)
+                         tag=self.no_ADC_warning_tag, pos=[int(viewport_width / 2 - 200), title_y_start + 130], show=False)
 
             # Camera warning (hidden by default)
             dpg.add_text("Warning, No cameras could be found/initialized!  Cannot continue!",
-                         tag=self.no_cam_warning_tag, pos=[int(viewport_width / 2 - 100), title_y_start + 90], show=False)
+                         tag=self.no_cam_warning_tag, pos=[int(viewport_width / 2 - 198), title_y_start + 150], show=False)
 
             # Text asking user to select which camera to use when multiple cameras are available (hidden by default)
             dpg.add_text("Multiple cameras are available, Please select which one you would like to use.",
-                         tag=self.multi_cam_avail_tag, pos=[int(viewport_width / 2 - 100), title_y_start + 90], show=False)
+                         tag=self.multi_cam_avail_tag, pos=[int(viewport_width / 2 - 215), title_y_start + 170], show=False)
 
             # Combo box to allow user to select which camera to use
             # Note that the combo box needs to have a callback with sets try initialization to true whenever its selection is changed
             dpg.add_combo(["Camera " + str(x + 1) for x in self.available_cameras], tag=self.camera_combo_select_tag,
-                          label="Select which camera to use", width=200, pos=[int(viewport_width / 2 - 80), title_y_start + 120], show=False)
+                          label="Select which camera to use", width=200, pos=[int(viewport_width / 2 - 80), title_y_start + 180], show=False)
+
+            dpg.add_button(label="Exit", width=button_width, height=button_height, show=False, tag=self.exit_button_tag,
+                           pos=[int(viewport_width / 2 - button_width / 2), button_y_start],
+                           callback=dpg.stop_dearpygui)
 
         # Indicate that this window has been created
         self.is_created = True
