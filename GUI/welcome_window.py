@@ -46,7 +46,8 @@ class WelcomeWindow(IWindow):
 
                 with dpg.table_row():
                     dpg.add_text("Default Camera Index:")
-                    dpg.add_combo(["Camera " + str(n) for n in range(0, 11)], width=settings_combo_box_width)
+                    dpg.add_combo(["Camera " + str(n) for n in range(0, 5)], default_value="Camera 0",
+                                  width=settings_combo_box_width)
 
             dpg.add_spacer(height=20)
             dpg.add_text("ADC analog input mapping:")
@@ -59,20 +60,23 @@ class WelcomeWindow(IWindow):
                 #   Save results to config file
                 with dpg.table_row():
                     dpg.add_text("Temperature 0:")
-                    dpg.add_combo(["ADC" + str(n) for n in range(0, 11)], label="Input", width=settings_combo_box_width)
+                    dpg.add_combo(["ADC" + str(n) for n in range(0, 11)], label="Input",
+                                  default_value="ADC0",
+                                  width=settings_combo_box_width)
                 for i in range(0, 5):
                     with dpg.table_row():
                         dpg.add_text("Pressure {}:".format(i))
                         dpg.add_combo(["ADC" + str(n) for n in range(0, 11)], label="Input",
+                                      default_value="ADC{}".format(i+1),
                                       width=settings_combo_box_width)
 
             dpg.add_spacer(height=20)
-            dpg.add_text("Welcome Screen Background")
+            dpg.add_text("Welcome Screen Background:")
             # Todo actually implement this, maybe show available images and make them clickable etc.
-            dpg.add_combo(["Background " + str(n) for n in range(0, 4)], width=120)
+            dpg.add_combo(["Background " + str(n) for n in range(0, 4)], default_value="Background 1", width=120)
 
             dpg.add_spacer(height=20)
-            dpg.add_text("Camera Resolution")
+            dpg.add_text("Camera Resolution:")
             with dpg.group(horizontal=True):
                 dpg.add_input_int(tag="width", width=50, step=0, default_value=800)
                 dpg.add_text(" x ")
@@ -80,7 +84,7 @@ class WelcomeWindow(IWindow):
                 dpg.add_text("(width x height)")
 
             dpg.add_spacer(height=20)
-            dpg.add_text("Default save location")
+            dpg.add_text("Default save location:")
             dpg.add_file_dialog(label="Select default save location", tag="select", show=False)
             dpg.add_button(label="Select", tag="open_select_window", callback=lambda: dpg.configure_item("select", show=True))
 
@@ -96,6 +100,10 @@ class WelcomeWindow(IWindow):
 
 
     def create(self, viewport_width: int, viewport_height: int):
+        # Don't show title bar
+        dpg.set_viewport_decorated(self.include_title_bar())
+        dpg.maximize_viewport()
+
         # Local vars
         # Note: These are only used for the button on this screen
         # Todo maybe implement some of this as a style and make the text larger and apply the style to these buttons instead

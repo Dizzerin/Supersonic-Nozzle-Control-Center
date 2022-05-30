@@ -36,7 +36,7 @@ class InitializationWindow(IWindow):
         return "Init Window"
 
     def include_title_bar(self) -> bool:
-        return True
+        return False
 
     def update(self):
         """ The first call to this function occurs before the window is even draw and some initialization steps
@@ -115,15 +115,17 @@ class InitializationWindow(IWindow):
         button_height = 35
 
         # Create textures/images (which will later be added to the window)
-        width, height, channels, data = dpg.load_image(r"Image_Resources/Red_Room_Red_Text_Lots_Of_Roof_Crop.png")
-        with dpg.texture_registry():
-            dpg.add_static_texture(width=width, height=height, default_value=data, tag="background_image_crop")
+        # width, height, channels, data = dpg.load_image(r"Image_Resources/Red_Room_Red_Text_Lots_Of_Roof_Crop.png")
+        # with dpg.texture_registry():
+        #     dpg.add_static_texture(width=width, height=height, default_value=data, tag="background_image_crop")
 
         # Build the window
         with dpg.window(tag=self.tag(), show=True):
             # TODO Verify positioning of all objects on this window
             # Add background image
-            dpg.add_image("background_image_crop", pos=[0, 0])
+            # TODO should probably handle this image differently, see note below
+            # Note: This depends on this image already being created and in the texture registry from the welcome screen
+            dpg.add_image("background_image", pos=[0, 0])
 
             # dpg.add_button(label="Home", callback=lambda: GUI_manager.change_window(GUI_manager.WELCOME_WINDOW))
 
