@@ -138,7 +138,7 @@ class LiveWindow(IWindow):
                                            user_data=self.brightness_slider_tag,
                                            callback=self.cam.reset_brightness_callback)
                         # Recording and Calibration Buttons
-                        button_y = viewport_height//2 + viewport_height//4 + 50
+                        button_y = viewport_height//2 + viewport_height//4 - 30
                         button_x_start = viewport_width//2 - viewport_width//4 - 100
                         button_width = 150
                         button_height = 35
@@ -155,7 +155,7 @@ class LiveWindow(IWindow):
                 with dpg.group(horizontal=False, pos=[viewport_width // 2 + 80, 60]) as right_group:
                     # TODO make this an "add plots" function?
                     # Plots
-                    dpg.add_text("Live Data", pos=[viewport_width // 2 + viewport_width // 4 + 20, 30])
+                    dpg.add_text("Live Data", pos=[viewport_width // 2 + viewport_width // 4, 30])
                     with dpg.subplots(rows=self.num_pressure_plots + 1, columns=1, row_ratios=[1, 1, 1, 1, 1, 1.3],
                                       width=self.plot_width,
                                       height=((self.num_pressure_plots + 1) * self.plot_height + 10)) as plot_group:
