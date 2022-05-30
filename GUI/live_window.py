@@ -92,6 +92,8 @@ class LiveWindow(IWindow):
 
         # Create textures which will later be added to the window
         with dpg.texture_registry(show=False):
+            # TODO don't hardcode texture/video size
+            #   also increase the size/resolution
             dpg.add_raw_texture(640, 480, raw_data, format=dpg.mvFormat_Float_rgba, tag=self.video_texture_tag)
 
         # Build the window
@@ -162,6 +164,8 @@ class LiveWindow(IWindow):
                             make all plot areas appear equal
                         """
                         # TODO set each plot's y axis limits?
+                        # TODO add tooltips to plots with further explanation of where that pressure is occurring
+                        # TODO Add text next to the plots with the current numerical value (and update it continually)
                         # Create pressure plots
                         for i in range(self.num_pressure_plots):
                             # Add plot
