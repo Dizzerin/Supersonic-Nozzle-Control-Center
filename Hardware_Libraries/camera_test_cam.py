@@ -13,14 +13,16 @@ This class is used for testing purposes
 
 
 class TestCamera(ICameraDataProvider):
-    def __init__(self):
+    def __init__(self, width, height):
         # Call super class's init
-        super(TestCamera, self).__init__()
+        super(TestCamera, self).__init__(width, height)
 
         # Local vars
         self.is_ready = False
         self.AF_enabled = True
         self.camera_index = None
+        self.width = width
+        self.height = height
 
         # Initialize PCB Camera Capture
         self.capture = None

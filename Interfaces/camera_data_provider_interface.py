@@ -3,9 +3,20 @@ from typing import List
 
 
 class ICameraDataProvider(ABC):
+    def __init__(self, width, height):
+        pass
+
     # @abstractmethod
     # def get_frame_at(self, time: datetime) -> 'frame':
     #     pass
+
+    @abstractmethod
+    def get_width(self) -> int:
+        pass
+
+    @abstractmethod
+    def get_height(self) -> int:
+        pass
 
     @abstractmethod
     def get_available_cameras(self) -> List[int]:

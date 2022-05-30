@@ -26,33 +26,11 @@ class WelcomeWindow(IWindow):
     def update(self):
         pass
 
-    def create(self, viewport_width: int, viewport_height: int):
-        # Local vars
-        # Note: These are only used for the button on this screen
-        # Todo maybe implement some of this as a style and make the text larger and apply the style to these buttons instead
-        button_y_start = viewport_height / 2 + 60
-        button_width = 150
-        button_height = 35
-        button_y_spacing = 60  # Number of vertical pixels between top of one button to top of next only for Welcome Window buttons
+    def _create_settings_pop_window(self, viewport_width: int, viewport_height: int):
+        # TODO make this read defaults from config file and write to config file
 
-        # Title positioning
-        title_y_start = 100
-
-        # Create textures/images (which will later be added to the window)
-        width1, height1, channels1, data1 = dpg.load_image(r"Image_Resources/Logo2.png")
-        # width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Red_Room_Red_Text.png")
-        # width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Red_Room_Blue_Text.png")
-        # width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Blue_Room_Blue_Text.png")
-        # width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Blue_Room_Blue_Text_Lots_Of_Roof.png")
-        # width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Red_Room_Blue_Text_Lots_Of_Roof.png")
-        width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Red_Room_Red_Text_Lots_Of_Roof.png")
-        with dpg.texture_registry():
-            dpg.add_static_texture(width=width1, height=height1, default_value=data1, tag="title_image")
-            dpg.add_static_texture(width=width2, height=height2, default_value=data2, tag="background_image")
-
-        # Build settings popup/modal window
         settings_window_width = 500
-        settings_window_height = 400
+        settings_window_height = 500
         settings_combo_box_width = 80
         settings_text_width = 200
         # Todo (move this somewhere else?)
@@ -89,19 +67,60 @@ class WelcomeWindow(IWindow):
                                       width=settings_combo_box_width)
 
             dpg.add_spacer(height=20)
-            dpg.add_text("Default Background")
+            dpg.add_text("Welcome Screen Background")
             # Todo actually implement this, maybe show available images and make them clickable etc.
             dpg.add_combo(["Background " + str(n) for n in range(0, 4)], width=120)
 
+            dpg.add_spacer(height=20)
+            dpg.add_text("Camera Resolution")
+            with dpg.group(horizontal=True):
+                dpg.add_input_int(tag="width", width=50, step=0, default_value=800)
+                dpg.add_text(" x ")
+                dpg.add_input_int(tag="height", width=50, step=0, default_value=640)
+                dpg.add_text("(width x height)")
+
+            dpg.add_spacer(height=20)
+            dpg.add_text("Default save location")
+            dpg.add_file_dialog(label="Select default save location", tag="select", show=False)
+            dpg.add_button(label="Select", tag="open_select_window", callback=lambda: dpg.configure_item("select", show=True))
+
             # OK (and Cancel?) buttons
             # Todo actually implement OK and cancel buttons, cancel doesn't save changes, OK does (also do error checking etc.)
-            dpg.add_spacer(height=20)
+            dpg.add_spacer(height=10)
             dpg.add_separator()
             with dpg.group(horizontal=True):
                 dpg.add_button(label="OK", width=75,
                                callback=lambda: dpg.configure_item(self.settings_window_tag, show=False))
-                # dpg.add_button(label="Cancel", width=75,
-                #                callback=lambda: dpg.configure_item(self.settings_window_tag, show=False))
+                dpg.add_button(label="Cancel", width=75,
+                               callback=lambda: dpg.configure_item(self.settings_window_tag, show=False))
+
+
+    def create(self, viewport_width: int, viewport_height: int):
+        # Local vars
+        # Note: These are only used for the button on this screen
+        # Todo maybe implement some of this as a style and make the text larger and apply the style to these buttons instead
+        button_y_start = viewport_height / 2 + 60
+        button_width = 150
+        button_height = 35
+        button_y_spacing = 60  # Number of vertical pixels between top of one button to top of next only for Welcome Window buttons
+
+        # Title positioning
+        title_y_start = 100
+
+        # Create textures/images (which will later be added to the window)
+        width1, height1, channels1, data1 = dpg.load_image(r"Image_Resources/Logo2.png")
+        # width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Red_Room_Red_Text.png")
+        # width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Red_Room_Blue_Text.png")
+        # width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Blue_Room_Blue_Text.png")
+        # width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Blue_Room_Blue_Text_Lots_Of_Roof.png")
+        # width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Red_Room_Blue_Text_Lots_Of_Roof.png")
+        width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Red_Room_Red_Text_Lots_Of_Roof.png")
+        with dpg.texture_registry():
+            dpg.add_static_texture(width=width1, height=height1, default_value=data1, tag="title_image")
+            dpg.add_static_texture(width=width2, height=height2, default_value=data2, tag="background_image")
+
+        # Build settings popup/modal window
+        self._create_settings_pop_window(viewport_width, viewport_height)
 
         # Build main welcome window
         with dpg.window(tag=self.tag(), show=True):

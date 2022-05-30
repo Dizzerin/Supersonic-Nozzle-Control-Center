@@ -5,7 +5,7 @@ from GUI import GUI_manager
 if __name__ == '__main__':
 
     # Instantiate data providers
-    camera_data_provider = PCBCamera()
+    camera_data_provider = PCBCamera(960, 720)
     ADC_data_provider = Ue9LabjackADC()
 
     # Initialize GUI

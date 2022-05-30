@@ -7,17 +7,27 @@ import os
 
 
 class PCBCamera(ICameraDataProvider):
-    def __init__(self):
+    def __init__(self, width, height):
         # Call super class's init
-        super(PCBCamera, self).__init__()
+        super(PCBCamera, self).__init__(width, height)
 
         # Local vars
         self.is_ready = False
         self.AF_enabled = True
         self.camera_index = None
+        self.width = width          # Desired width
+        self.height = height        # Desired height
+        self.actual_width = None    # Actual width that could be set
+        self.actual_height = None   # Actual height that could be set
 
         # Initialize PCB Camera Capture
         self.capture = None
+
+    def get_width(self) -> int:
+        return self.actual_width
+
+    def get_height(self) -> int:
+        return self.actual_height
 
     def get_available_cameras(self) -> List[int]:
         # Iterates through the first 10 indexes
@@ -49,6 +59,19 @@ class PCBCamera(ICameraDataProvider):
             self.capture = cv.VideoCapture(camera_index, cv.CAP_DSHOW)
         else:
             self.capture = cv.VideoCapture(camera_index)
+
+        # Try setting resolution
+        # Todo get this from config file and test with actual camera we will be using
+        self.capture.set(cv.CAP_PROP_FRAME_WIDTH, self.width)
+        self.capture.set(cv.CAP_PROP_FRAME_HEIGHT, self.height)
+        # Check if resolution was set
+        self.actual_width = self.capture.get(cv.CAP_PROP_FRAME_WIDTH)
+        self.actual_height = self.capture.get(cv.CAP_PROP_FRAME_HEIGHT)
+        if not (self.actual_width == self.width and self.actual_height == self.height):
+            # Resolution was not set
+            # TODO handle this differently
+            print("Requested resolution could not be set.")
+            print("Set resolution to: {} x {}".format(self.actual_width, self.actual_height))
 
         # Check if camera stream could be opened/obtained
         if self.capture.isOpened():

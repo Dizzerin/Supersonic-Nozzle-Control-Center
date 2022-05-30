@@ -37,6 +37,8 @@ class LiveWindow(IWindow):
         self.AF_enable_button_tag = "AF_enable_button_tag"
         self.brightness_slider_tag = "brightness_slider_tag"
         self.reset_brightness_tag = "reset_brightness"
+        self.recording_button_tag = "recording_button"
+        self.calibrate_button_tag = "calibrate_button"
 
     def is_created(self) -> bool:
         return self.is_created
@@ -92,9 +94,8 @@ class LiveWindow(IWindow):
 
         # Create textures which will later be added to the window
         with dpg.texture_registry(show=False):
-            # TODO don't hardcode texture/video size
-            #   also increase the size/resolution
-            dpg.add_raw_texture(640, 480, raw_data, format=dpg.mvFormat_Float_rgba, tag=self.video_texture_tag)
+            dpg.add_raw_texture(self.cam.get_width(), self.cam.get_height(), raw_data, format=dpg.mvFormat_Float_rgba,
+                                tag=self.video_texture_tag)
 
         # Build the window
         with dpg.window(tag=self.tag(), show=False):
@@ -114,31 +115,49 @@ class LiveWindow(IWindow):
                                          callback=self.cam.set_autofocus_callback, tag=self.AF_enable_button_tag)
                         # dpg.add_checkbox(label="Auto Exposure")
 
-                    # Focus and brightness sliders
-                    with dpg.group(horizontal=False):
-                        # Todo Verify range
-                        dpg.add_slider_int(label="Focus", tag=self.focus_slider_tag, vertical=False, default_value=0,
-                                           min_value=0,
-                                           max_value=1012,
-                                           clamped=True, width=100,
-                                           user_data=self.AF_enable_button_tag,
-                                           callback=self.cam.set_focus_callback)
-                        # dpg.add_spacer(width=100)
-                        dpg.add_slider_int(label="Brightness", tag=self.brightness_slider_tag, vertical=False,
-                                           default_value=0,
-                                           min_value=-64,
-                                           max_value=64, width=100, clamped=True,
-                                           callback=self.cam.set_brightness_callback)
-                        dpg.add_button(label="Reset brightness", tag=self.reset_brightness_tag,
-                                       user_data=self.brightness_slider_tag,
-                                       callback=self.cam.reset_brightness_callback)
+                    with dpg.group(horizontal=True):
+                        # Focus and brightness sliders
+                        slider_and_button_width = 150
+                        with dpg.group(horizontal=False):
+                            # Todo Verify range
+                            dpg.add_slider_int(label="Focus", tag=self.focus_slider_tag, vertical=False,
+                                               default_value=0,
+                                               min_value=0,
+                                               max_value=1012,
+                                               clamped=True, width=slider_and_button_width,
+                                               user_data=self.AF_enable_button_tag,
+                                               callback=self.cam.set_focus_callback)
+                            dpg.add_slider_int(label="Brightness", tag=self.brightness_slider_tag, vertical=False,
+                                               default_value=0,
+                                               min_value=-64,
+                                               max_value=64, width=slider_and_button_width, clamped=True,
+                                               callback=self.cam.set_brightness_callback)
+                            dpg.add_spacer(height=5)
+                            dpg.add_button(label="Reset brightness", tag=self.reset_brightness_tag,
+                                           width=slider_and_button_width,
+                                           user_data=self.brightness_slider_tag,
+                                           callback=self.cam.reset_brightness_callback)
+                        # Recording and Calibration Buttons
+                        button_y = viewport_height//2 + viewport_height//4 + 50
+                        button_x_start = viewport_width//2 - viewport_width//4 - 100
+                        button_width = 150
+                        button_height = 35
+                        button_x_spacing = 300
+                        with dpg.group(horizontal=True):
+                            dpg.add_button(label="Start Recording", width=button_width, height=button_height,
+                                           pos=[button_x_start + button_x_spacing*0, button_y],
+                                           tag=self.recording_button_tag)
+                            dpg.add_button(label="Calibrate Sensors", width=button_width, height=button_height,
+                                           pos=[button_x_start + button_x_spacing*1, button_y],
+                                           tag=self.calibrate_button_tag)
 
                 # Right-hand side group
-                with dpg.group(horizontal=False) as right_group:
+                with dpg.group(horizontal=False, pos=[viewport_width // 2 + 80, 60]) as right_group:
                     # TODO make this an "add plots" function?
                     # Plots
+                    dpg.add_text("Live Data", pos=[viewport_width // 2 + viewport_width // 4 + 20, 30])
                     with dpg.subplots(rows=self.num_pressure_plots + 1, columns=1, row_ratios=[1, 1, 1, 1, 1, 1.3],
-                                      label="Live Data", width=self.plot_width,
+                                      width=self.plot_width,
                                       height=((self.num_pressure_plots + 1) * self.plot_height + 10)) as plot_group:
                         # Create pressure plots (and temperature plot at the end)
                         """
