@@ -109,38 +109,45 @@ class InitializationWindow(IWindow):
 
     def create(self, viewport_width: int, viewport_height: int):
         # Local vars
-        title_y_start = 80
-        button_y_start = title_y_start + 210
+        text_y_start = 500
+        button_y_start = text_y_start + 90
         button_width = 150
         button_height = 35
+
+        # Create textures/images (which will later be added to the window)
+        width, height, channels, data = dpg.load_image(r"Image_Resources/Red_Room_Red_Text_Lots_Of_Roof_Crop.png")
+        with dpg.texture_registry():
+            dpg.add_static_texture(width=width, height=height, default_value=data, tag="background_image_crop")
 
         # Build the window
         with dpg.window(tag=self.tag(), show=True):
             # TODO Verify positioning of all objects on this window
+            # Add background image
+            dpg.add_image("background_image_crop", pos=[0, 0])
 
-            dpg.add_button(label="Home", callback=lambda: GUI_manager.change_window(GUI_manager.WELCOME_WINDOW))
+            # dpg.add_button(label="Home", callback=lambda: GUI_manager.change_window(GUI_manager.WELCOME_WINDOW))
 
             # Add title/subtitle text
-            dpg.add_text("Supersonic Nozzle Control Center 0.1.0", pos=[int(viewport_width / 2 - 130), title_y_start])
-            dpg.add_text("Initializing...", pos=[int(viewport_width / 2 - 50), title_y_start + 30])
-            dpg.add_loading_indicator(pos=[int(viewport_width / 2 - 20), title_y_start + 70])
+            # dpg.add_text("Supersonic Nozzle Control Center 0.1.0", pos=[int(viewport_width / 2 - 130), title_y_start])
+            dpg.add_text("Initializing...", pos=[int(viewport_width / 2 - 50), text_y_start])
+            dpg.add_loading_indicator(pos=[int(viewport_width / 2 - 20), text_y_start + 50])
 
             # ADC warning (hidden by default)
             dpg.add_text("Warning, ADC unit could not be found/initialized!  Cannot continue!",
-                         tag=self.no_ADC_warning_tag, pos=[int(viewport_width / 2 - 200), title_y_start + 130], show=False)
+                         tag=self.no_ADC_warning_tag, pos=[int(viewport_width / 2 - 200), text_y_start + 130], show=False)
 
             # Camera warning (hidden by default)
             dpg.add_text("Warning, No cameras could be found/initialized!  Cannot continue!",
-                         tag=self.no_cam_warning_tag, pos=[int(viewport_width / 2 - 198), title_y_start + 150], show=False)
+                         tag=self.no_cam_warning_tag, pos=[int(viewport_width / 2 - 198), text_y_start + 150], show=False)
 
             # Text asking user to select which camera to use when multiple cameras are available (hidden by default)
             dpg.add_text("Multiple cameras are available, Please select which one you would like to use.",
-                         tag=self.multi_cam_avail_tag, pos=[int(viewport_width / 2 - 215), title_y_start + 170], show=False)
+                         tag=self.multi_cam_avail_tag, pos=[int(viewport_width / 2 - 215), text_y_start + 170], show=False)
 
             # Combo box to allow user to select which camera to use
             # Note that the combo box needs to have a callback with sets try initialization to true whenever its selection is changed
             dpg.add_combo(["Camera " + str(x + 1) for x in self.available_cameras], tag=self.camera_combo_select_tag,
-                          label="Select which camera to use", width=200, pos=[int(viewport_width / 2 - 80), title_y_start + 180], show=False)
+                          label="Select which camera to use", width=200, pos=[int(viewport_width / 2 - 80), text_y_start + 180], show=False)
 
             dpg.add_button(label="Exit", width=button_width, height=button_height, show=False, tag=self.exit_button_tag,
                            pos=[int(viewport_width / 2 - button_width / 2), button_y_start],

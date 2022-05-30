@@ -38,7 +38,7 @@ class WelcomeWindow(IWindow):
                         width=settings_window_width, height=settings_window_height,
                         pos=[int(viewport_width / 2 - settings_window_width / 2),
                              int(viewport_height / 2 - settings_window_height / 2)]):
-            # Settings options
+            # Settings
             with dpg.table(header_row=False, resizable=False, borders_innerH=False, borders_outerH=False,
                            borders_innerV=False, borders_outerV=False):
                 dpg.add_table_column(init_width_or_weight=settings_text_width, width_fixed=True)
@@ -108,7 +108,7 @@ class WelcomeWindow(IWindow):
         title_y_start = 100
 
         # Create textures/images (which will later be added to the window)
-        width1, height1, channels1, data1 = dpg.load_image(r"Image_Resources/Logo2.png")
+        # width1, height1, channels1, data1 = dpg.load_image(r"Image_Resources/Logo2.png")
         # width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Red_Room_Red_Text.png")
         # width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Red_Room_Blue_Text.png")
         # width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Blue_Room_Blue_Text.png")
@@ -116,7 +116,7 @@ class WelcomeWindow(IWindow):
         # width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Red_Room_Blue_Text_Lots_Of_Roof.png")
         width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Red_Room_Red_Text_Lots_Of_Roof.png")
         with dpg.texture_registry():
-            dpg.add_static_texture(width=width1, height=height1, default_value=data1, tag="title_image")
+            # dpg.add_static_texture(width=width1, height=height1, default_value=data1, tag="title_image")
             dpg.add_static_texture(width=width2, height=height2, default_value=data2, tag="background_image")
 
         # Build settings popup/modal window
