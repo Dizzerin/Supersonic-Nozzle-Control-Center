@@ -1,12 +1,12 @@
 from Hardware_Libraries.camera_PCB_cam import PCBCamera
-from Hardware_Libraries.ADC_labjack import Ue9LabjackADC
+from Hardware_Libraries.ADC_labjack import Ue9LabJackADC
 from GUI import GUI_manager
 
 if __name__ == '__main__':
 
     # Instantiate data providers
-    camera_data_provider = PCBCamera(960, 720)
-    ADC_data_provider = Ue9LabjackADC()
+    camera_data_provider = PCBCamera(1024, 768)
+    ADC_data_provider = Ue9LabJackADC()
 
     # Initialize GUI
     GUI_manager.init_GUI(camera_data_provider=camera_data_provider, ADC_data_provider=ADC_data_provider)

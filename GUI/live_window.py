@@ -232,5 +232,8 @@ class LiveWindow(IWindow):
                             dpg.add_theme_style(dpg.mvPlotStyleVar_LabelPadding, 10)
                     dpg.bind_item_theme(plot_group, plot_group_container_theme)
 
+        # Set ADC's data acquisition start time
+        self.ADC.set_acquisition_start_time()
+
         # Indicate that this window has been created
         self.is_created = True

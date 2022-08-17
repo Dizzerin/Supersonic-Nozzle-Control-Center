@@ -9,5 +9,5 @@ class ICameraDataWriter(ABC):
         self.file = file
 
     @abstractmethod
-    def write_camera_frame(self, frame_data: custom_types.DataRow, time: datetime) -> bool:
+    def write_camera_frame(self, frame_data: custom_types.SensorData, time: datetime) -> bool:
         pass

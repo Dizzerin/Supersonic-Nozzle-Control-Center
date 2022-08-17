@@ -24,26 +24,26 @@ class ADCTestDevice(IADCDataProvider):
         print("ADC initialization routine called")
         self.is_ready = True
 
-    def is_ready(self) -> bool:
+    def is_calibrated(self) -> bool:
         return self.is_ready
 
     def calibrate(self):
         # TODO test calibration offsets etc.?
         print("ADC calibration routine called")
 
-    def _convert_raw_data(self, data_array) -> custom_types.DataRow:
+    def _convert_raw_data(self, data_array) -> custom_types.SensorData:
         # TODO test calibration offsets etc.?
-        converted_data = custom_types.DataRow(datetime.now(),
-                                              data_array[0],
-                                              data_array[1],
-                                              data_array[2],
-                                              data_array[3],
-                                              data_array[4],
-                                              data_array[5]
-                                              )
+        converted_data = custom_types.SensorData(datetime.now(),
+                                                 data_array[0],
+                                                 data_array[1],
+                                                 data_array[2],
+                                                 data_array[3],
+                                                 data_array[4],
+                                                 data_array[5]
+                                                 )
         return converted_data
 
-    def get_next_data_row(self) -> custom_types.DataRow:
+    def get_next_data_row(self) -> custom_types.SensorData:
         # Return randomized data values
         raw_data = [random.randrange(0, 100),
                     random.randrange(0, 100),

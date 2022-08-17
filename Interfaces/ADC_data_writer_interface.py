@@ -9,5 +9,9 @@ class IADCDataWriter(ABC):
         self.file = file
 
     @abstractmethod
-    def write_ADC_data(self, data: custom_types.DataRow, time: datetime) -> bool:
+    def set_recording_start_time(self):
+        pass
+
+    @abstractmethod
+    def write_ADC_data(self, data: custom_types.SensorData, time: datetime) -> bool:
         pass

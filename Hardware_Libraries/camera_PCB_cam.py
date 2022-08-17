@@ -19,6 +19,12 @@ class PCBCamera(ICameraDataProvider):
         self.height = height        # Desired height
         self.actual_width = None    # Actual width that could be set
         self.actual_height = None   # Actual height that could be set
+        # TODO have these stored in a config file?
+        self.default_focus = 178
+        self.default_exposure = -4
+        # TODO make the GUI use these focus and exposure vars
+        self.focus = self.default_focus
+        self.exposure = self.default_exposure
 
         # Initialize PCB Camera Capture
         self.capture = None
