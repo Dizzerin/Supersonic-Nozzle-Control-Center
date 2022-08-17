@@ -62,7 +62,7 @@ class InitializationWindow(IWindow):
 
             # Try to find and initialize ADC
             self.ADC_provider.initialize()
-            if not self.ADC_provider.is_calibrated:
+            if not self.ADC_provider.is_initialized:
                 # Show no ADC warning text
                 dpg.configure_item(self.no_ADC_warning_tag, show=True)
                 dpg.configure_item(self.exit_button_tag, show=True)

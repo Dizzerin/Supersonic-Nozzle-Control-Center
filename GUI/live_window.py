@@ -18,17 +18,18 @@ class LiveWindow(IWindow):
         # Plot sizing and data arrays
         # Global pressures and other plot data
         self.time_data = [0]
+        self.axis_duration = 200
         self.axis_start_time = 0
-        self.axis_end_time = 200
+        self.axis_end_time = self.axis_duration
         self.num_pressure_plots = 5
         self.plot_height = 150  # pixels
         self.plot_width = 800  # pixels
+        self.t0_y_data = []
         self.p0_y_data = []
         self.p1_y_data = []
         self.p2_y_data = []
         self.p3_y_data = []
         self.p4_y_data = []
-        self.t0_y_data = []
         self.is_created = False
 
         # UI element tags
@@ -69,20 +70,20 @@ class LiveWindow(IWindow):
 
         # Read new data from ADC
         ADC_data = self.ADC.get_next_data_row()
+        self.t0_y_data.append(ADC_data.t0)
         self.p0_y_data.append(ADC_data.p0)
         self.p1_y_data.append(ADC_data.p1)
         self.p2_y_data.append(ADC_data.p2)
         self.p3_y_data.append(ADC_data.p3)
         self.p4_y_data.append(ADC_data.p4)
-        self.t0_y_data.append(ADC_data.t0)
 
         # Update plots
+        self._update_plot("t0_series", "t0_x_axis", self.t0_y_data)
         self._update_plot("p0_series", "p0_x_axis", self.p0_y_data)
         self._update_plot("p1_series", "p1_x_axis", self.p1_y_data)
         self._update_plot("p2_series", "p2_x_axis", self.p2_y_data)
         self._update_plot("p3_series", "p3_x_axis", self.p3_y_data)
         self._update_plot("p4_series", "p4_x_axis", self.p4_y_data)
-        self._update_plot("t0_series", "t0_x_axis", self.t0_y_data)
 
     def update(self):
         self._update_video()

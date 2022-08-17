@@ -3,6 +3,7 @@ from Interfaces.ADC_data_provider_interface import IADCDataProvider
 from Temp_Interfaces import custom_types
 from datetime import datetime, timedelta
 import ue9
+import numpy as np
 
 
 class Ue9LabJackADC(IADCDataProvider):
@@ -30,27 +31,27 @@ class Ue9LabJackADC(IADCDataProvider):
 
         # Computed/read values
         self.atmospheric_psi = 14.26  # (P_atm in documentation, units: psi, defaults to avg pressure at 800ft)
-        self.adc_offsets = [0.0, 0.0, 0.0, 0.0, 0.0]  # (ba in documentation, units: V)
+        self.adc_offsets = np.array([0.0, 0.0, 0.0, 0.0, 0.0])  # (ba in documentation, units: V)
 
         # Stored offsets and gains
-        self.adc_gains = [0.049094016,  # (ma in documentation, units: V/mv)
-                          0.048944909,
-                          0.049298768,
-                          0.049041140,
-                          0.048913343
-                          ]
-        self.sensor_offsets = [-0.006,  # (bs in documentation, units: mV)
-                               0.0180,
-                               0.0220,
-                               -0.206,
-                               0.0140
-                               ]
-        self.sensor_gains = [0.100665,  # (ms in documentation, units: mV/psi)
-                             0.100508,
-                             0.200050,
-                             1.003380,
-                             2.019160
-                             ]
+        self.adc_gains = np.array([0.049094016,  # (ma in documentation, units: V/mv)
+                                   0.048944909,
+                                   0.049298768,
+                                   0.049041140,
+                                   0.048913343
+                                   ])
+        self.sensor_offsets = np.array([-0.006,  # (bs in documentation, units: mV)
+                                        0.0180,
+                                        0.0220,
+                                        -0.206,
+                                        0.0140
+                                        ])
+        self.sensor_gains = np.array([0.100665,  # (ms in documentation, units: mV/psi)
+                                      0.100508,
+                                      0.200050,
+                                      1.003380,
+                                      2.019160
+                                      ])
 
     def initialize(self):
         # Initialize LabJack ADC
@@ -59,12 +60,20 @@ class Ue9LabJackADC(IADCDataProvider):
         except LabJackException as exception:
             self.is_initialized = False
         else:
+            # Temp calibrate with estimated default calibration value so live data can be displayed before actual
+            # calibration takes place
+            self.calibrate(self.atmospheric_psi)
+            # Manually reset is_calibrated to false since official calibration hasn't taken place
+            self.is_calibrated = False
+
+            # Update initialized status var
             self.is_initialized = True
 
     def is_initialized(self) -> bool:
         return self.is_initialized
 
     def is_calibrated(self) -> bool:
+        # TODO check that this is true before recording data
         return self.is_calibrated
 
     def calibrate(self, atmospheric_psi: float):
@@ -77,8 +86,10 @@ class Ue9LabJackADC(IADCDataProvider):
         raw_adc_readings = self._get_raw_readings()
 
         # Compute adc offsets
-        self.adc_offsets = self.amplifier_gains * (raw_adc_readings / self.amplifier_gains - (
+        self.adc_offsets = self.adc_gains * (raw_adc_readings[1:] / self.adc_gains - (
                 self.sensor_gains * self.atmospheric_psi + self.sensor_offsets))
+
+        # TODO compute adc_offset for temperature as well
 
         # Update calibration status var
         self.is_calibrated = True
@@ -98,21 +109,19 @@ class Ue9LabJackADC(IADCDataProvider):
                 ]
 
     def _convert_raw_readings(self, raw_adc_readings) -> custom_types.SensorData:
-        # Throw error if device has not been calibrated yet
-        if not self.is_calibrated():
-            raise Exception("Error, ADC must first be calibrated")
-
         # Converted data (units: deg celsius, psi, psi, psi, psi, psi)
-        converted_data = ((raw_adc_readings - self.adc_offsets) / self.adc_gains - self.sensor_offsets) / (
+        converted_pressures = ((raw_adc_readings[1:] - self.adc_offsets) / self.adc_gains - self.sensor_offsets) / (
             self.sensor_gains)
 
+        # TODO convert first sensor reading as well which is the temperature
+
         # Store the final converted data in a SensorData object
-        sensor_data = custom_types.SensorData(converted_data[0],
-                                              converted_data[1],
-                                              converted_data[2],
-                                              converted_data[3],
-                                              converted_data[4],
-                                              converted_data[5]
+        sensor_data = custom_types.SensorData(raw_adc_readings[0],
+                                              converted_pressures[0],
+                                              converted_pressures[1],
+                                              converted_pressures[2],
+                                              converted_pressures[3],
+                                              converted_pressures[4],
                                               )
         return sensor_data
 
