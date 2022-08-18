@@ -5,10 +5,6 @@ from typing import List
 
 class IConfigFileHandler(ABC):
     @abstractmethod
-    def __init__(self, config_filepath):
-        self.config_file = config_filepath
-
-    @abstractmethod
     def get_default_save_location(self) -> str:
         pass
 

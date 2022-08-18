@@ -3,11 +3,14 @@ from Temp_Interfaces.custom_types import TemperatureSensorSettingsData, Pressure
 import configparser
 from typing import List
 
+# TODO implement use of this!!! Also maybe make everything more dynamic based off the information this returns
+#  i.e. the number of sensors etc.
+
 
 class INIConfigFileHandler(IConfigFileHandler):
     def __init__(self, config_filepath: str):
         # Call super class's init
-        super(INIConfigFileHandler, self).__init__(config_filepath)
+        super(INIConfigFileHandler, self).__init__()
 
         # Local vars
         self.config_file = config_filepath
@@ -88,16 +91,16 @@ class INIConfigFileHandler(IConfigFileHandler):
         self.general_section["camera_height"] = str(height)
 
     def set_pressure_sensor(self, pressure_sensor: PressureSensorConfigData):
-        self.adc_input_mapping_section[str(pressure_sensor.name)] = str(pressure_sensor.adc_input)
-        self.amplifier_gains_section[str(pressure_sensor.name)] = str(pressure_sensor.amplifier_gain)
-        self.sensor_gains_section[str(pressure_sensor.name)] = str(pressure_sensor.sensor_gain)
-        self.sensor_offsets_section[str(pressure_sensor.name)] = str(pressure_sensor.sensor_offset)
-        self.description_strings_section[str(pressure_sensor.name)] = str(pressure_sensor.descr_string)
+        self.adc_input_mapping_section[pressure_sensor.name.value] = pressure_sensor.adc_input.value
+        self.amplifier_gains_section[pressure_sensor.name.value] = str(pressure_sensor.amplifier_gain)
+        self.sensor_gains_section[pressure_sensor.name.value] = str(pressure_sensor.sensor_gain)
+        self.sensor_offsets_section[pressure_sensor.name.value] = str(pressure_sensor.sensor_offset)
+        self.description_strings_section[pressure_sensor.name.value] = pressure_sensor.descr_string
 
     def set_temperature_sensor(self, temperature_sensor: TemperatureSensorSettingsData):
-        self.adc_input_mapping_section[str(temperature_sensor.name)] = str(temperature_sensor.adc_input)
-        self.amplifier_gains_section[str(temperature_sensor.name)] = str(temperature_sensor.amplifier_gain)
-        self.description_strings_section[str(temperature_sensor.name)] = str(temperature_sensor.descr_string)
+        self.adc_input_mapping_section[temperature_sensor.name.value] = temperature_sensor.adc_input.value
+        self.amplifier_gains_section[temperature_sensor.name.value] = str(temperature_sensor.amplifier_gain)
+        self.description_strings_section[temperature_sensor.name.value] = temperature_sensor.descr_string
 
     def write_config_file(self):
         # Todo report success/failure and/or handle errors?
