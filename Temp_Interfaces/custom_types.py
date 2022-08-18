@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum
 import datetime
 
 
@@ -40,3 +41,47 @@ class SensorDataWriteRow:
     p2: float
     p3: float
     p4: float
+
+
+class ADCInput(Enum):
+    ADC0 = "ADC0"
+    ADC1 = "ADC1"
+    ADC2 = "ADC2"
+    ADC3 = "ADC3"
+    ADC4 = "ADC4"
+    ADC5 = "ADC5"
+    ADC6 = "ADC6"
+    ADC7 = "ADC7"
+    ADC8 = "ADC8"
+    ADC9 = "ADC9"
+    ADC10 = "ADC10"
+    ADC11 = "ADC11"
+    ADC12 = "ADC12"
+    ADC13 = "ADC13"
+
+
+class SensorName(Enum):
+    t0 = "t0"
+    p0 = "p0"
+    p1 = "p1"
+    p2 = "p2"
+    p3 = "p3"
+    p4 = "p4"
+
+
+@dataclass
+class PressureSensorConfigData:
+    name: SensorName
+    descr_string: str
+    adc_input: ADCInput
+    amplifier_gain: float
+    sensor_gain: float
+    sensor_offset: float
+
+
+@dataclass
+class TemperatureSensorSettingsData:
+    name: SensorName
+    descr_string: str
+    adc_input: ADCInput
+    amplifier_gain: float

@@ -1,6 +1,8 @@
 import dearpygui.dearpygui as dpg
 from Interfaces.window_interface import IWindow
+from Interfaces.config_file_handler_interface import IConfigFileHandler
 from GUI import GUI_manager
+from Temp_Interfaces.custom_types import PressureSensorConfigData, TemperatureSensorSettingsData, ADCInput
 
 
 class WelcomeWindow(IWindow):
@@ -26,7 +28,7 @@ class WelcomeWindow(IWindow):
     def update(self):
         pass
 
-    def _create_settings_pop_window(self, viewport_width: int, viewport_height: int):
+    def _create_settings_pop_window(self, viewport_width: int, viewport_height: int, config_file_handler: IConfigFileHandler):
         # TODO make this read defaults from config file and write to config file
 
         settings_window_width = 500
@@ -82,11 +84,6 @@ class WelcomeWindow(IWindow):
                 for key, value in descriptions.items():
                     with dpg.tooltip(parent=key):
                         dpg.add_text(value)
-
-            dpg.add_spacer(height=20)
-            dpg.add_text("Welcome Screen Background:")
-            # Todo actually implement this, maybe show available images and make them clickable etc.
-            dpg.add_combo(["Background " + str(n) for n in range(0, 4)], default_value="Background 1", width=120)
 
             dpg.add_spacer(height=20)
             dpg.add_text("Camera Resolution:")

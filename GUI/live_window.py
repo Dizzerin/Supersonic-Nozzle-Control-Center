@@ -214,6 +214,7 @@ class LiveWindow(IWindow):
                                 dpg.add_line_series(self.time_data, [], label="Temperature 0", tag="t0_series")
 
                     # Add tooltips to temperature and pressure text
+                    # TODO use this from config file
                     descriptions = {"t0_y_axis": "Temperature inside the tank (stagnation temperature)",
                                     "p0_y_axis": "Pressure inside the tank (stagnation pressure)",
                                     "p1_y_axis": "Pressure upstream of the throat",

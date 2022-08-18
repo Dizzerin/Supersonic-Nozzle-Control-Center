@@ -1,5 +1,5 @@
 from Interfaces.ADC_data_writer_interface import IADCDataWriter
-from Temp_Interfaces import custom_types
+from Temp_Interfaces.custom_types import SensorDataWriteRow
 from datetime import datetime, timedelta
 
 
@@ -27,12 +27,12 @@ class ADCDataFileWriter(IADCDataWriter):
         else:
             elapsed_recording_time = current_time - self.recording_start_time
 
-        data_row = custom_types.SensorData(elapsed_acquisition_time.total_seconds(),
-                                           elapsed_recording_time.total_seconds(),
-                                           converted_data[0],
-                                           converted_data[1],
-                                           converted_data[2],
-                                           converted_data[3],
-                                           converted_data[4],
-                                           converted_data[5]
-                                           )
+        data_row = SensorDataWriteRow(elapsed_acquisition_time.total_seconds(),
+                                      elapsed_recording_time.total_seconds(),
+                                      converted_data[0],
+                                      converted_data[1],
+                                      converted_data[2],
+                                      converted_data[3],
+                                      converted_data[4],
+                                      converted_data[5]
+                                      )
