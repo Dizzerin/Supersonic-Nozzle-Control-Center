@@ -15,6 +15,8 @@ class LiveWindow(IWindow):
         self.ADC = ADC_data_provider
 
         # TODO change the way this is handled?
+        # TODO only store the amount of data necessary for display (so it doesn't continually increase memory consumption)
+        # TODO auto rescale graphs?
         # Plot sizing and data arrays
         # Global pressures and other plot data
         self.time_data = [0]

@@ -14,7 +14,7 @@ class ADCDataFileWriter(IADCDataWriter):
     def set_recording_start_time(self):
         self.recording_start_time = datetime.now()
 
-    def do_stuff(self):
+    def write_ADC_data(self):
         # Throw error if acquisition time has not been set yet
         if self.acquisition_start_time is None:
             raise Exception("Error, acquisition time must be set")

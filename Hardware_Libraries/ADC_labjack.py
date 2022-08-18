@@ -31,15 +31,15 @@ class Ue9LabJackADC(IADCDataProvider):
 
         # Computed/read values
         self.atmospheric_psi = 14.26  # (P_atm in documentation, units: psi, defaults to avg pressure at 800ft)
-        self.adc_offsets = np.array([0.0, 0.0, 0.0, 0.0, 0.0])  # (ba in documentation, units: V)
+        self.amplifier_offsets = np.array([0.0, 0.0, 0.0, 0.0, 0.0])  # (ba in documentation, units: V)
 
         # Stored offsets and gains
-        self.adc_gains = np.array([0.049094016,  # (ma in documentation, units: V/mv)
-                                   0.048944909,
-                                   0.049298768,
-                                   0.049041140,
-                                   0.048913343
-                                   ])
+        self.amplifier_gains = np.array([0.049094016,  # (ma in documentation, units: V/mv)
+                                         0.048944909,
+                                         0.049298768,
+                                         0.049041140,
+                                         0.048913343
+                                         ])
         self.sensor_offsets = np.array([-0.006,  # (bs in documentation, units: mV)
                                         0.0180,
                                         0.0220,
@@ -86,7 +86,7 @@ class Ue9LabJackADC(IADCDataProvider):
         raw_adc_readings = self._get_raw_readings()
 
         # Compute adc offsets
-        self.adc_offsets = self.adc_gains * (raw_adc_readings[1:] / self.adc_gains - (
+        self.amplifier_offsets = self.amplifier_gains * (raw_adc_readings[1:] / self.amplifier_gains - (
                 self.sensor_gains * self.atmospheric_psi + self.sensor_offsets))
 
         # TODO compute adc_offset for temperature as well
@@ -110,7 +110,7 @@ class Ue9LabJackADC(IADCDataProvider):
 
     def _convert_raw_readings(self, raw_adc_readings) -> custom_types.SensorData:
         # Converted data (units: deg celsius, psi, psi, psi, psi, psi)
-        converted_pressures = ((raw_adc_readings[1:] - self.adc_offsets) / self.adc_gains - self.sensor_offsets) / (
+        converted_pressures = ((raw_adc_readings[1:] - self.amplifier_offsets) / self.amplifier_gains - self.sensor_offsets) / (
             self.sensor_gains)
 
         # TODO convert first sensor reading as well which is the temperature
