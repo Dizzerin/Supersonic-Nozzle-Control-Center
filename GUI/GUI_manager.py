@@ -3,9 +3,7 @@ from Interfaces.window_interface import IWindow
 from Interfaces.camera_data_provider_interface import ICameraDataProvider
 from Interfaces.ADC_data_provider_interface import IADCDataProvider
 from Interfaces.config_handler_interface import IConfigHandler
-from GUI import welcome_window
-from GUI import live_window
-from GUI import initialization_window
+from GUI import initialization_window, welcome_window, live_window, about_window
 
 # Global variables (only used for the GUI)
 # TODO maybe later make these not globals (create these windows in init function, return them, and pass them into the
@@ -15,10 +13,11 @@ INITIALIZATION_WINDOW = None
 LIVE_WINDOW = None
 WELCOME_WINDOW = None
 CURRENT_WINDOW = None
+ABOUT_WINDOW = None
 
 
 def init_GUI(camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCDataProvider, config_handler: IConfigHandler):
-    global INITIALIZATION_WINDOW, LIVE_WINDOW, WELCOME_WINDOW, CURRENT_WINDOW
+    global INITIALIZATION_WINDOW, LIVE_WINDOW, WELCOME_WINDOW, CURRENT_WINDOW, ABOUT_WINDOW
 
     # Initialization for DPG
     dpg.create_context()
@@ -36,6 +35,7 @@ def init_GUI(camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCD
     INITIALIZATION_WINDOW = initialization_window.InitializationWindow(camera_data_provider, ADC_data_provider)
     LIVE_WINDOW = live_window.LiveWindow(camera_data_provider, ADC_data_provider)
     WELCOME_WINDOW = welcome_window.WelcomeWindow(config_handler)
+    ABOUT_WINDOW = about_window.AboutWindow()
 
     # Create first window
     WELCOME_WINDOW.create(viewport_width, viewport_height)
