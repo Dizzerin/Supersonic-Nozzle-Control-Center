@@ -2,6 +2,7 @@ import dearpygui.dearpygui as dpg
 from Interfaces.window_interface import IWindow
 from Interfaces.camera_data_provider_interface import ICameraDataProvider
 from Interfaces.ADC_data_provider_interface import IADCDataProvider
+from Interfaces.config_handler_interface import IConfigHandler
 from GUI import welcome_window
 from GUI import live_window
 from GUI import initialization_window
@@ -16,7 +17,7 @@ WELCOME_WINDOW = None
 CURRENT_WINDOW = None
 
 
-def init_GUI(camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCDataProvider):
+def init_GUI(camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCDataProvider, config_handler: IConfigHandler):
     global INITIALIZATION_WINDOW, LIVE_WINDOW, WELCOME_WINDOW, CURRENT_WINDOW
 
     # Initialization for DPG
@@ -34,7 +35,7 @@ def init_GUI(camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCD
     # Instantiate window classes
     INITIALIZATION_WINDOW = initialization_window.InitializationWindow(camera_data_provider, ADC_data_provider)
     LIVE_WINDOW = live_window.LiveWindow(camera_data_provider, ADC_data_provider)
-    WELCOME_WINDOW = welcome_window.WelcomeWindow()
+    WELCOME_WINDOW = welcome_window.WelcomeWindow(config_handler)
 
     # Create first window
     WELCOME_WINDOW.create(viewport_width, viewport_height)

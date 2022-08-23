@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 import datetime
+from typing import List
 
 
 @dataclass
@@ -44,6 +45,7 @@ class SensorDataWriteRow:
 
 
 class ADCInput(Enum):
+    # List of valid ADC inputs
     ADC0 = "ADC0"
     ADC1 = "ADC1"
     ADC2 = "ADC2"
@@ -61,6 +63,11 @@ class ADCInput(Enum):
 
 
 class SensorName(Enum):
+    # All possible valid sensor names (can add more here if more sensors are added later)
+    # anything prefixed with "t" is a temperature sensor and anything prefixed with "p" is a pressure sensor
+    # TODO add some more here and add them to the config file and change the order they appear in the config file and see how
+    # that affects the settings window
+    # TODO make sure the rest of the program uses the config object
     t0 = "t0"
     p0 = "p0"
     p1 = "p1"
@@ -85,3 +92,20 @@ class TemperatureSensorSettingsData:
     descr_string: str
     adc_input: ADCInput
     amplifier_gain: float
+
+
+@dataclass
+class ADCMapObj:
+    # Maps a sensor to an ADC input
+    sensor_name: SensorName
+    adc_input: ADCInput
+
+
+@dataclass
+class SettingsObj:
+    # This is what the settings window hands to the "OK" button callback
+    default_camera_index: int
+    camera_width: int
+    camera_height: int
+    default_save_location: str
+    ADC_map_list: List[ADCMapObj]
