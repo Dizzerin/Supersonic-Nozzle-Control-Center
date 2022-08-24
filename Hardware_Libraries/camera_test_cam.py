@@ -1,4 +1,4 @@
-from Interfaces.camera_data_provider_interface import ICameraDataProvider
+from Hardware_Interfaces.camera_data_provider_interface import ICameraDataProvider
 import dearpygui.dearpygui as dpg
 from typing import List
 """

@@ -1,9 +1,8 @@
 import dearpygui.dearpygui as dpg
-from Interfaces.window_interface import IWindow
+from Software_Interfaces.window_interface import IWindow
 from GUI import GUI_manager
-from Interfaces.camera_data_provider_interface import ICameraDataProvider
-from Interfaces.ADC_data_provider_interface import IADCDataProvider
-import time
+from Hardware_Interfaces.camera_data_provider_interface import ICameraDataProvider
+from Hardware_Interfaces.ADC_data_provider_interface import IADCDataProvider
 
 
 class InitializationWindow(IWindow):

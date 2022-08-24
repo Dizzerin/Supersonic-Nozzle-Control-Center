@@ -1,5 +1,5 @@
 import dearpygui.dearpygui as dpg
-from Interfaces.window_interface import IWindow
+from Software_Interfaces.window_interface import IWindow
 from GUI import GUI_manager
 
 
@@ -24,6 +24,10 @@ class AboutWindow(IWindow):
         pass
 
     def create(self, viewport_width: int, viewport_height: int):
+        # Don't show title bar
+        dpg.set_viewport_decorated(self.include_title_bar())
+        dpg.maximize_viewport()
+
         # Local vars
         # Note: These are only used for the button on this screen
         # Todo maybe implement some of this as a style and make the text larger and apply the style to these buttons instead

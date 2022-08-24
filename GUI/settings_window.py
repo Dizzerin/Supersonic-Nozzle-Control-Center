@@ -1,5 +1,5 @@
 import dearpygui.dearpygui as dpg
-from Interfaces.config_handler_interface import IConfigHandler
+from Software_Interfaces.config_handler_interface import IConfigHandler
 from Temp_Interfaces.custom_types import ADCInput, SettingsObj, ADCMapObj
 from typing import List, TypedDict
 

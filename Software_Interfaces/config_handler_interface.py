@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from Temp_Interfaces.custom_types import PressureSensorConfigData, TemperatureSensorConfigData, ADCMapObj, SettingsObj
+from Custom_Types.custom_types import PressureSensorConfigData, TemperatureSensorConfigData, ConfigSettings
 from typing import List
 
 
@@ -53,12 +53,8 @@ class IConfigHandler(ABC):
         pass
 
     @abstractmethod
-    def set_adc_input(self, adc_map_obj: ADCMapObj):
+    def set_config_settings(self, config_settings: ConfigSettings):
         pass
-
-    # @abstractmethod
-    # def set_settings_obj(self, settings_object: SettingsObj):
-    #     pass
 
     @abstractmethod
     def write_config_file(self):

@@ -1,6 +1,6 @@
 import dearpygui.dearpygui as dpg
-from Interfaces.window_interface import IWindow
-from Interfaces.config_handler_interface import IConfigHandler
+from Software_Interfaces.window_interface import IWindow
+from Software_Interfaces.config_handler_interface import IConfigHandler
 from GUI.settings_window import create_settings_pop_window
 from GUI import GUI_manager
 

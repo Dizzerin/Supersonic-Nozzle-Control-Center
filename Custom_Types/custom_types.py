@@ -25,9 +25,7 @@ class SensorDataWriteRow:
     """
     Structure defining the values contained in a data row
     This "struct" is used to contain all the data associated with what gets written by the ADC data writer
-
     TODO may get rid of this, may not need it
-
     Each row has two timestamps associated with it, a temperature, and a number of pressure readings
     acquisition_elapsed_time is the time since the ADC began reporting data during the current session
     recording_elapsed_time is the time since the ADC data recording (writing to file etc.) began
@@ -44,7 +42,13 @@ class SensorDataWriteRow:
     p4: float
 
 
-class ADCInput(Enum):
+class ValidSensorTypes(Enum):
+    # List of valid sensor type strings that can be specified in the config file
+    temperature_sensor = "temperature"
+    pressure_sensor = "pressure"
+
+
+class ValidADCInputs(Enum):
     # List of valid ADC inputs
     ADC0 = "ADC0"
     ADC1 = "ADC1"
@@ -62,24 +66,11 @@ class ADCInput(Enum):
     ADC13 = "ADC13"
 
 
-class SensorName(Enum):
-    # TODO DO AWAY WITH THIS
-    # All possible valid sensor names (can add more here if more sensors are added later)
-    # anything prefixed with "t" is a temperature sensor and anything prefixed with "p" is a pressure sensor
-    # that affects the settings window
-    t0 = "t0"
-    p0 = "p0"
-    p1 = "p1"
-    p2 = "p2"
-    p3 = "p3"
-    p4 = "p4"
-
-
 @dataclass
 class PressureSensorConfigData:
-    name: SensorName
+    name: str
     descr_string: str
-    adc_input: ADCInput
+    adc_input: ValidADCInputs
     amplifier_gain: float
     sensor_gain: float
     sensor_offset: float
@@ -87,17 +78,10 @@ class PressureSensorConfigData:
 
 @dataclass
 class TemperatureSensorConfigData:
-    name: SensorName
+    name: str
     descr_string: str
-    adc_input: ADCInput
+    adc_input: ValidADCInputs
     amplifier_gain: float
-
-
-@dataclass
-class ADCMapObj:
-    # Maps a sensor to an ADC input
-    sensor_name: SensorName
-    adc_input: ADCInput
 
 
 @dataclass
@@ -110,14 +94,3 @@ class ConfigSettings:
     default_save_location: str
     temperature_sensor_list: List[TemperatureSensorConfigData]
     pressure_sensor_list: List[PressureSensorConfigData]
-
-
-@dataclass
-class SettingsObj:
-    # TODO DO AWAY WITH THIS
-    # This is what the settings window hands to the "OK" button callback
-    default_camera_index: int
-    camera_width: int
-    camera_height: int
-    default_save_location: str
-    ADC_map_list: List[ADCMapObj]
