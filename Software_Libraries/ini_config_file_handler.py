@@ -1,5 +1,5 @@
 from Interfaces.config_handler_interface import IConfigHandler
-from Temp_Interfaces.custom_types import TemperatureSensorSettingsData, PressureSensorConfigData, SensorName, ADCInput, \
+from Temp_Interfaces.custom_types import TemperatureSensorConfigData, PressureSensorConfigData, SensorName, ADCInput, \
     ADCMapObj
 import configparser
 from typing import List
@@ -64,18 +64,18 @@ class INIConfigHandler(IConfigHandler):
         # Return list
         return pressure_sensor_list
 
-    def get_temperature_sensors(self) -> List[TemperatureSensorSettingsData]:
+    def get_temperature_sensors(self) -> List[TemperatureSensorConfigData]:
         # Create and return list of pressure sensors
         temperature_sensor_list = []
 
         for key in self.adc_input_mapping_section:
             # All temperature sensor names should be prefixed with "t"
             if key[0] == "t":
-                temperature_sensor = TemperatureSensorSettingsData(name=SensorName(key),
-                                                                   descr_string=self.description_strings_section.get(key),
-                                                                   adc_input=ADCInput(self.adc_input_mapping_section.get(key)),
-                                                                   amplifier_gain=self.amplifier_gains_section.getfloat(key)
-                                                                   )
+                temperature_sensor = TemperatureSensorConfigData(name=SensorName(key),
+                                                                 descr_string=self.description_strings_section.get(key),
+                                                                 adc_input=ADCInput(self.adc_input_mapping_section.get(key)),
+                                                                 amplifier_gain=self.amplifier_gains_section.getfloat(key)
+                                                                 )
                 # Add pressure sensor to list
                 temperature_sensor_list.append(temperature_sensor)
 
@@ -101,7 +101,7 @@ class INIConfigHandler(IConfigHandler):
         self.sensor_offsets_section[pressure_sensor.name.value] = str(pressure_sensor.sensor_offset)
         self.description_strings_section[pressure_sensor.name.value] = pressure_sensor.descr_string
 
-    def set_temperature_sensor(self, temperature_sensor: TemperatureSensorSettingsData):
+    def set_temperature_sensor(self, temperature_sensor: TemperatureSensorConfigData):
         self.adc_input_mapping_section[temperature_sensor.name.value] = temperature_sensor.adc_input.value
         self.amplifier_gains_section[temperature_sensor.name.value] = str(temperature_sensor.amplifier_gain)
         self.description_strings_section[temperature_sensor.name.value] = temperature_sensor.descr_string

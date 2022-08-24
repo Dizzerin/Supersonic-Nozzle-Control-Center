@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from Temp_Interfaces.custom_types import PressureSensorConfigData, TemperatureSensorSettingsData, ADCMapObj, SettingsObj
+from Temp_Interfaces.custom_types import PressureSensorConfigData, TemperatureSensorConfigData, ADCMapObj, SettingsObj
 from typing import List
 
 
@@ -25,7 +25,7 @@ class IConfigHandler(ABC):
         pass
 
     @abstractmethod
-    def get_temperature_sensors(self) -> List[TemperatureSensorSettingsData]:
+    def get_temperature_sensors(self) -> List[TemperatureSensorConfigData]:
         pass
 
     @abstractmethod
@@ -49,7 +49,7 @@ class IConfigHandler(ABC):
         pass
 
     @abstractmethod
-    def set_temperature_sensor(self, temperature_sensor: TemperatureSensorSettingsData):
+    def set_temperature_sensor(self, temperature_sensor: TemperatureSensorConfigData):
         pass
 
     @abstractmethod

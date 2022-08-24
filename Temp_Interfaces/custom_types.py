@@ -63,11 +63,10 @@ class ADCInput(Enum):
 
 
 class SensorName(Enum):
+    # TODO DO AWAY WITH THIS
     # All possible valid sensor names (can add more here if more sensors are added later)
     # anything prefixed with "t" is a temperature sensor and anything prefixed with "p" is a pressure sensor
-    # TODO add some more here and add them to the config file and change the order they appear in the config file and see how
     # that affects the settings window
-    # TODO make sure the rest of the program uses the config object
     t0 = "t0"
     p0 = "p0"
     p1 = "p1"
@@ -87,7 +86,7 @@ class PressureSensorConfigData:
 
 
 @dataclass
-class TemperatureSensorSettingsData:
+class TemperatureSensorConfigData:
     name: SensorName
     descr_string: str
     adc_input: ADCInput
@@ -102,7 +101,20 @@ class ADCMapObj:
 
 
 @dataclass
+class ConfigSettings:
+    # This object encapsulates all the data contained within the config/settings file
+    # This is what the config handler ultimately reads and writes
+    default_camera_index: int
+    camera_width: int
+    camera_height: int
+    default_save_location: str
+    temperature_sensor_list: List[TemperatureSensorConfigData]
+    pressure_sensor_list: List[PressureSensorConfigData]
+
+
+@dataclass
 class SettingsObj:
+    # TODO DO AWAY WITH THIS
     # This is what the settings window hands to the "OK" button callback
     default_camera_index: int
     camera_width: int
