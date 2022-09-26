@@ -1,13 +1,13 @@
 from unittest import TestCase
-from Temp_Interfaces.custom_types import *
-from Software_Libraries.ini_config_file_handler import INIConfigHandler
+from Custom_Types.custom_types import *
+from Software_Libraries.config_file_handler import ConfigHandler
 # Quick file to run some basic test -- not full coverage
 
 
 class TestINIConfigFileHandler(TestCase):
     def test_some_stuff(self):
         # Create config handler class
-        cfh = INIConfigHandler("../config.cfg")
+        cfh = ConfigHandler("../config.cfg")
 
         # Test reading in some data
         pressure_sensors = cfh.get_pressure_sensors()

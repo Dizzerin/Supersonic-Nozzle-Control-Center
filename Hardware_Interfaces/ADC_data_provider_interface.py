@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from Temp_Interfaces import custom_types
+from Custom_Types import custom_types
 
 
 class IADCDataProvider(ABC):

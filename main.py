@@ -1,6 +1,6 @@
 from Hardware_Libraries.camera_PCB_cam import PCBCamera
 from Hardware_Libraries.ADC_labjack import Ue9LabJackADC
-from Software_Libraries.ini_config_file_handler import INIConfigHandler
+from Software_Libraries.config_file_handler import ConfigHandler
 from os import path
 from GUI import GUI_manager
 
@@ -11,7 +11,7 @@ if __name__ == '__main__':
     # Instantiate data providers
     camera_data_provider = PCBCamera(1024, 768)
     ADC_data_provider = Ue9LabJackADC()
-    config_handler = INIConfigHandler(config_file_path)
+    config_handler = ConfigHandler(config_file_path)
 
     # Initialize GUI
     GUI_manager.init_GUI(camera_data_provider=camera_data_provider, ADC_data_provider=ADC_data_provider,

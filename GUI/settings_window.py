@@ -1,6 +1,6 @@
 import dearpygui.dearpygui as dpg
 from Software_Interfaces.config_handler_interface import IConfigHandler
-from Temp_Interfaces.custom_types import ADCInput, SettingsObj, ADCMapObj
+from Custom_Types.custom_types import ADCInput, SettingsObj, ADCMapObj
 from typing import List, TypedDict
 
 
@@ -148,6 +148,7 @@ def create_settings_pop_window(config_handler: IConfigHandler, settings_window_t
         dpg.add_spacer(height=5)
         with dpg.group(horizontal=True):
             # TODO the get_value call doesn't appear to get the selected value from the combo boxes
+            # OK button callback user data contains all settings data that gets passed to the configHandler
             dpg.add_button(label="OK", width=75,
                            callback=_settings_ok_button_callback,
                            user_data={"config_handler": config_handler,

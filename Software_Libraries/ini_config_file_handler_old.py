@@ -1,5 +1,5 @@
 from Software_Interfaces.config_handler_interface import IConfigHandler
-from Temp_Interfaces.custom_types import TemperatureSensorConfigData, PressureSensorConfigData, SensorName, ADCInput, \
+from Custom_Types.custom_types import TemperatureSensorConfigData, PressureSensorConfigData, SensorName, ADCInput, \
     ADCMapObj
 import configparser
 from typing import List

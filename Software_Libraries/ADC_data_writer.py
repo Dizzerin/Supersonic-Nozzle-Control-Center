@@ -1,5 +1,5 @@
 from Hardware_Interfaces.ADC_data_writer_interface import IADCDataWriter
-from Temp_Interfaces.custom_types import SensorDataWriteRow
+from Custom_Types.custom_types import SensorDataWriteRow
 from datetime import datetime, timedelta
 
 

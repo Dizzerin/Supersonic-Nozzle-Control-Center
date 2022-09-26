@@ -1,6 +1,6 @@
 from LabJackPython import LabJackException
 from Hardware_Interfaces.ADC_data_provider_interface import IADCDataProvider
-from Temp_Interfaces import custom_types
+from Custom_Types import custom_types
 from datetime import datetime, timedelta
 import ue9
 import numpy as np
