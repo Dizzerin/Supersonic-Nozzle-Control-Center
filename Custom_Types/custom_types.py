@@ -91,6 +91,6 @@ class ConfigSettings:
     default_camera_index: int
     camera_width: int
     camera_height: int
-    default_save_location: str
+    default_save_directory: str
     temperature_sensor_list: List[TemperatureSensorConfigData]
     pressure_sensor_list: List[PressureSensorConfigData]

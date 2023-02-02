@@ -148,7 +148,7 @@ class ConfigHandler(IConfigHandler):
         #   pressure sensors) as there is no reason an additional sensor would need to be added, but, if
         #   that was necessary for some reason, it can be done by directly editing the config file
 
-        # Ensure name is upper case
+        # Ensure name is upper case (force it to all upper)
         pressure_sensor.name = pressure_sensor.name.upper()
 
         # Locate the corresponding pressure sensor in the local list and replace it with this pressure sensor
@@ -174,7 +174,7 @@ class ConfigHandler(IConfigHandler):
         #   temperature sensors) as there is no reason an additional sensor would need to be added, but, if
         #   that was necessary for some reason, it can be done by directly editing the config file
 
-        # Ensure name is upper case
+        # Ensure name is upper case (force it to all upper)
         temperature_sensor.name = temperature_sensor.name.upper()
 
         # Locate the corresponding temperature sensor in the local list and replace it with this temperature sensor
@@ -193,7 +193,7 @@ class ConfigHandler(IConfigHandler):
         self.set_default_camera_index(config_settings.default_camera_index)
         self.set_camera_width(config_settings.camera_width)
         self.set_camera_height(config_settings.camera_height)
-        self.set_default_save_directory(config_settings.default_save_location)
+        self.set_default_save_directory(config_settings.default_save_directory)
 
         for p_sensor in config_settings.pressure_sensor_list:
             self.set_pressure_sensor(p_sensor)

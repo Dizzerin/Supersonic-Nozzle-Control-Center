@@ -13,7 +13,7 @@ class _DirSelectorCallbackDict(TypedDict):
 class _OKButtonCallbackDict(TypedDict):
     config_handler: IConfigHandler
     settings_window_tag: str
-    settings_obj: ConfigSettings
+    config_settings_obj: ConfigSettings
 
 
 def create_settings_pop_window(config_handler: IConfigHandler, settings_window_tag: str, viewport_width: int,
@@ -153,12 +153,11 @@ def create_settings_pop_window(config_handler: IConfigHandler, settings_window_t
                            callback=_settings_ok_button_callback,
                            user_data={"config_handler": config_handler,
                                       "settings_window_tag": settings_window_tag,
-                                      "settings_obj": ConfigSettings(
-                                          # TODO the default camera index needs to be the number (i.e. 0) not "Camera 0"
-                                          default_camera_index=dpg.get_item_info(default_camera_index_selection_tag),
+                                      "config_settings_obj": ConfigSettings(
+                                          default_camera_index=int(dpg.get_value(default_camera_index_selection_tag)[-1]),
                                           camera_width=dpg.get_value(camera_width_selection_tag),
                                           camera_height=dpg.get_value(camera_height_selection_tag),
-                                          default_save_location=dpg.get_value(current_dir_location_text_tag),
+                                          default_save_directory=dpg.get_value(current_dir_location_text_tag),
                                           temperature_sensor_list=[TemperatureSensorConfigData(
                                               name=temperature_sensor.name,
                                               descr_string="TODO",  # Todo
@@ -232,28 +231,43 @@ def _settings_ok_button_callback(sender, app_data, user_data: _OKButtonCallbackD
     # Unpack/alias values from user_data
     config_handler = user_data["config_handler"]
     settings_window_tag = user_data["settings_window_tag"]
-    settings_object = user_data["settings_obj"]
+    config_settings_obj = user_data["config_settings_obj"]
 
     # Update all basic settings on config handler to reflect the user's selections in the settings window
-    config_handler.set_default_camera_index(settings_object.default_camera_index)
-    config_handler.set_camera_width(settings_object.camera_width)
-    config_handler.set_camera_height(settings_object.camera_height)
-    config_handler.set_default_save_directory(settings_object.default_save_location)
+    config_handler.set_default_camera_index(config_settings_obj.default_camera_index)
+    config_handler.set_camera_width(config_settings_obj.camera_width)
+    config_handler.set_camera_height(config_settings_obj.camera_height)
+    config_handler.set_default_save_directory(config_settings_obj.default_save_directory)
 
-    # Update ADC Input Mappings
-    selected_adc_inputs: List[ADCInput] = []  # Running "total" list of all the adc inputs we've encountered so far
-    for ADC_map_obj in settings_object.ADC_map_list:
-        # Make sure this ADC input isn't already mapped to a sensor
-        if ADC_map_obj.adc_input in selected_adc_inputs:
+    # Verify one ADC input isn't mapped to two different sensors
+    used_ADC_inputs: List[ValidADCInputs] = []  # Running "total" list of all the adc inputs we've encountered so far
+    # Loop through all pressure sensors
+    for temperature_sensor in config_settings_obj.temperature_sensor_list:
+        # Throw error if this ADC input isn't already mapped to a sensor
+        if temperature_sensor.adc_input in used_ADC_inputs:
             # TODO raise custom exception type instead? or show a popup window with the warning
-            raise Exception("ADC Input {} mapped to two sensors!".format(ADCMapObj.adc_input.value))
-
+            raise Exception("ADC Input {} mapped to two sensors!".format(temperature_sensor.adc_input.value))
+        # Else add ADC input to list of used ADC inputs
         else:
-            # Set/map the sensor to its ADC input
-            config_handler.set_adc_input(adc_map_obj=ADC_map_obj)
+            used_ADC_inputs.append(temperature_sensor.adc_input)
 
-            # Add ADC input to list of used ADC inputs
-            selected_adc_inputs.append(ADC_map_obj.adc_input)
+    # Loop through all temperature sensors
+    for pressure_sensor in config_settings_obj.pressure_sensor_list:
+        # Throw error if this ADC input isn't already mapped to a sensor
+        if pressure_sensor.adc_input in used_ADC_inputs:
+            # TODO raise custom exception type instead? or show a popup window with the warning
+            raise Exception("ADC Input {} mapped to two sensors!".format(pressure_sensor.adc_input.value))
+        # Else add ADC input to list of used ADC inputs
+        else:
+            used_ADC_inputs.append(pressure_sensor.adc_input)
+
+    # Update all the temperature sensors
+    for temperature_sensor in config_settings_obj.temperature_sensor_list:
+        config_handler.set_temperature_sensor(temperature_sensor)
+
+    # Update all the pressure sensors
+    for pressure_sensor in config_settings_obj.pressure_sensor_list:
+        config_handler.set_pressure_sensor(pressure_sensor)
 
     # Save the new settings
     config_handler.write_config_file()
