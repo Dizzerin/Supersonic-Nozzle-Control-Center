@@ -154,23 +154,26 @@ def create_settings_pop_window(config_handler: IConfigHandler, settings_window_t
                            user_data={"config_handler": config_handler,
                                       "settings_window_tag": settings_window_tag,
                                       "config_settings_obj": ConfigSettings(
+                                          # Todo looks like I may have to change all the combo box things to use callbacks
+                                          #     which set globals because the method used here appears to just return
+                                          #     the default values
                                           default_camera_index=int(dpg.get_value(default_camera_index_selection_tag)[-1]),
                                           camera_width=dpg.get_value(camera_width_selection_tag),
                                           camera_height=dpg.get_value(camera_height_selection_tag),
                                           default_save_directory=dpg.get_value(current_dir_location_text_tag),
                                           temperature_sensor_list=[TemperatureSensorConfigData(
                                               name=temperature_sensor.name,
-                                              descr_string="TODO",  # Todo
+                                              descr_string=temperature_sensor.descr_string,
                                               adc_input=ValidADCInputs(dpg.get_value(temperature_sensor.name + "_adc_selection_tag")),
-                                              amplifier_gain=0, # Todo
+                                              amplifier_gain=temperature_sensor.amplifier_gain,
                                           ) for temperature_sensor in temperature_sensors],
                                           pressure_sensor_list=[PressureSensorConfigData(
                                               name=pressure_sensor.name,
-                                              descr_string="Todo", #todo
+                                              descr_string=pressure_sensor.descr_string,
                                               adc_input=ValidADCInputs(dpg.get_value(pressure_sensor.name + "_adc_selection_tag")),
-                                              amplifier_gain=0, #todo
-                                              sensor_gain=0, #todo
-                                              sensor_offset=0, #todo
+                                              amplifier_gain=pressure_sensor.amplifier_gain,
+                                              sensor_gain=pressure_sensor.sensor_gain,
+                                              sensor_offset=pressure_sensor.sensor_offset,
                                           ) for pressure_sensor in pressure_sensors]
                                       )}
                            )
@@ -232,6 +235,10 @@ def _settings_ok_button_callback(sender, app_data, user_data: _OKButtonCallbackD
     config_handler = user_data["config_handler"]
     settings_window_tag = user_data["settings_window_tag"]
     config_settings_obj = user_data["config_settings_obj"]
+
+    # todo temp print debugging, remove when done debugging
+    #   It appears the config settings being passed in here are not correct, they are the original, not the updated ones
+    print(config_settings_obj)
 
     # Update all basic settings on config handler to reflect the user's selections in the settings window
     config_handler.set_default_camera_index(config_settings_obj.default_camera_index)
