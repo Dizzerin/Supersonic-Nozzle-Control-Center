@@ -54,11 +54,8 @@ class TestConfigFileHandler(TestCase):
         self.assertEqual(p0_after, p0_test, "pressure sensor data was not updated properly")
         self.assertEqual(cfh.get_camera_width(), width_test)
 
-
-
         # Write the file
         cfh.write_config_file()
-
 
         # Read in changed data
         pressure_sensors_after = cfh.get_pressure_sensors()

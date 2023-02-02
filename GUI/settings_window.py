@@ -1,6 +1,6 @@
 import dearpygui.dearpygui as dpg
 from Software_Interfaces.config_handler_interface import IConfigHandler
-from Custom_Types.custom_types import ADCInput, SettingsObj, ADCMapObj
+from Custom_Types.custom_types import ConfigSettings, TemperatureSensorConfigData, PressureSensorConfigData, ValidADCInputs
 from typing import List, TypedDict
 
 
@@ -13,7 +13,7 @@ class _DirSelectorCallbackDict(TypedDict):
 class _OKButtonCallbackDict(TypedDict):
     config_handler: IConfigHandler
     settings_window_tag: str
-    settings_obj: SettingsObj
+    settings_obj: ConfigSettings
 
 
 def create_settings_pop_window(config_handler: IConfigHandler, settings_window_tag: str, viewport_width: int,
@@ -36,7 +36,7 @@ def create_settings_pop_window(config_handler: IConfigHandler, settings_window_t
 
     # Read config file
     default_camera = config_handler.get_default_camera_index()
-    valid_ADC_options = [element.value for element in ADCInput]
+    valid_ADC_options = [element.value for element in ValidADCInputs]
     temperature_sensors = config_handler.get_temperature_sensors()
     pressure_sensors = config_handler.get_pressure_sensors()
     camera_width = config_handler.get_camera_width()
@@ -84,29 +84,29 @@ def create_settings_pop_window(config_handler: IConfigHandler, settings_window_t
             # Temperature sensors
             for temperature_sensor in temperature_sensors:
                 with dpg.table_row():
-                    dpg.add_text("Temperature Sensor {}:".format(temperature_sensor.name.value[-1]),
-                                 tag=temperature_sensor.name.value)
+                    dpg.add_text("Temperature Sensor {}:".format(temperature_sensor.name[-1]),
+                                 tag=temperature_sensor.name)
                     # Tooltip
-                    with dpg.tooltip(parent=temperature_sensor.name.value):
+                    with dpg.tooltip(parent=temperature_sensor.name):
                         dpg.add_text(temperature_sensor.descr_string)
                     # Combo selection box
                     dpg.add_combo(valid_ADC_options, label="Input",
                                   default_value=temperature_sensor.adc_input.value,
                                   width=settings_combo_box_width,
-                                  tag=temperature_sensor.name.value + "_adc_selection_tag")
+                                  tag=temperature_sensor.name + "_adc_selection_tag")
             # Pressure sensors
             for pressure_sensor in pressure_sensors:
                 with dpg.table_row():
-                    dpg.add_text("Pressure Sensor {}:".format(pressure_sensor.name.value[-1]),
-                                 tag=pressure_sensor.name.value)
+                    dpg.add_text("Pressure Sensor {}:".format(pressure_sensor.name[-1]),
+                                 tag=pressure_sensor.name)
                     # Tooltip
-                    with dpg.tooltip(parent=pressure_sensor.name.value):
+                    with dpg.tooltip(parent=pressure_sensor.name):
                         dpg.add_text(pressure_sensor.descr_string)
                     # Combo selection box
                     dpg.add_combo(valid_ADC_options, label="Input",
                                   default_value=pressure_sensor.adc_input.value,
                                   width=settings_combo_box_width,
-                                  tag=pressure_sensor.name.value + "_adc_selection_tag")
+                                  tag=pressure_sensor.name + "_adc_selection_tag")
 
         # Camera Resolution Settings (Width and Height)
         dpg.add_spacer(height=20)
@@ -153,23 +153,26 @@ def create_settings_pop_window(config_handler: IConfigHandler, settings_window_t
                            callback=_settings_ok_button_callback,
                            user_data={"config_handler": config_handler,
                                       "settings_window_tag": settings_window_tag,
-                                      "settings_obj": SettingsObj(
+                                      "settings_obj": ConfigSettings(
                                           # TODO the default camera index needs to be the number (i.e. 0) not "Camera 0"
                                           default_camera_index=dpg.get_item_info(default_camera_index_selection_tag),
                                           camera_width=dpg.get_value(camera_width_selection_tag),
                                           camera_height=dpg.get_value(camera_height_selection_tag),
                                           default_save_location=dpg.get_value(current_dir_location_text_tag),
-                                          ADC_map_list=[ADCMapObj(sensor_name=pressure_sensor.name,
-                                                                  adc_input=ADCInput(dpg.get_value(
-                                                                      pressure_sensor.name.value + "_adc_selection_tag")))
-                                                        for
-                                                        pressure_sensor in pressure_sensors] +
-                                                       [ADCMapObj(sensor_name=temperature_sensor.name,
-                                                                  adc_input=ADCInput(
-                                                                      dpg.get_value(
-                                                                          temperature_sensor.name.value + "_adc_selection_tag")))
-                                                        for
-                                                        temperature_sensor in temperature_sensors]
+                                          temperature_sensor_list=[TemperatureSensorConfigData(
+                                              name=temperature_sensor.name,
+                                              descr_string="TODO",  # Todo
+                                              adc_input=ValidADCInputs(dpg.get_value(temperature_sensor.name + "_adc_selection_tag")),
+                                              amplifier_gain=0, # Todo
+                                          ) for temperature_sensor in temperature_sensors],
+                                          pressure_sensor_list=[PressureSensorConfigData(
+                                              name=pressure_sensor.name,
+                                              descr_string="Todo", #todo
+                                              adc_input=ValidADCInputs(dpg.get_value(pressure_sensor.name + "_adc_selection_tag")),
+                                              amplifier_gain=0, #todo
+                                              sensor_gain=0, #todo
+                                              sensor_offset=0, #todo
+                                          ) for pressure_sensor in pressure_sensors]
                                       )}
                            )
             dpg.add_button(label="Cancel", width=75,
@@ -201,7 +204,7 @@ def _directory_selector_callback(sender, app_data, user_data: _DirSelectorCallba
     want anything to take effect until the user actually clicks "OK")
 
     I have chosen to simply set the value of the current directory text element in the settings window UI here.
-    The settings window then passes the value of this text element as part of the SettingsObj which gets passed to
+    The settings window then passes the value of this text element as part of the ConfigSettings object which gets passed to
     the OK button callback handler whenever OK is clicked
     """
     # self._user_selected_save_directory = selected_directory
@@ -222,7 +225,7 @@ def _settings_ok_button_callback(sender, app_data, user_data: _OKButtonCallbackD
     :param sender: the tag of the UI element (the file selection dialog window)
     :param app_data: None
     :type app_data: None
-    :param user_data: (dictionary) containing: config_handler object, settings window tag, and a SettingsObj
+    :param user_data: (dictionary) containing: config_handler object, settings window tag, and a ConfigSettings object
     :type user_data: _OKButtonCallbackDict
     :return: None
     """
