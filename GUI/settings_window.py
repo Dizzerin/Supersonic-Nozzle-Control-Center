@@ -1,6 +1,7 @@
 import dearpygui.dearpygui as dpg
 from Software_Interfaces.config_handler_interface import IConfigHandler
-from Custom_Types.custom_types import ConfigSettings, TemperatureSensorConfigData, PressureSensorConfigData, ValidADCInputs
+from Custom_Types.custom_types import ConfigSettings, TemperatureSensorConfigData, PressureSensorConfigData, \
+    ValidADCInputs
 from typing import List, TypedDict
 
 
@@ -43,7 +44,82 @@ def create_settings_pop_window(config_handler: IConfigHandler, settings_window_t
     camera_height = config_handler.get_camera_height()
     default_save_directory = config_handler.get_default_save_directory()
 
-    # Settings
+    def _settings_ok_button_callback(sender, app_data, user_data: _OKButtonCallbackDict):
+        """
+        This is called when the user clicks the "OK" button at the bottom of the settings window
+        We now need to save all the settings
+
+        :param sender: the tag of the UI element (the file selection dialog window)
+        :param app_data: None
+        :type app_data: None
+        :param user_data: None
+        :return: None
+        """
+        config_settings_obj = ConfigSettings(
+            default_camera_index=int(dpg.get_value(default_camera_index_selection_tag)[-1]),
+            camera_width=dpg.get_value(camera_width_selection_tag),
+            camera_height=dpg.get_value(camera_height_selection_tag),
+            default_save_directory=dpg.get_value(current_dir_location_text_tag),
+            temperature_sensor_list=[TemperatureSensorConfigData(
+                name=temperature_sensor.name,
+                descr_string=temperature_sensor.descr_string,
+                adc_input=ValidADCInputs(dpg.get_value(temperature_sensor.name + "_adc_selection_tag")),
+                amplifier_gain=temperature_sensor.amplifier_gain,
+            ) for temperature_sensor in temperature_sensors],
+            pressure_sensor_list=[PressureSensorConfigData(
+                name=pressure_sensor.name,
+                descr_string=pressure_sensor.descr_string,
+                adc_input=ValidADCInputs(dpg.get_value(pressure_sensor.name + "_adc_selection_tag")),
+                amplifier_gain=pressure_sensor.amplifier_gain,
+                sensor_gain=pressure_sensor.sensor_gain,
+                sensor_offset=pressure_sensor.sensor_offset,
+            ) for pressure_sensor in pressure_sensors]
+        )
+
+        # Update all basic settings on config handler to reflect the user's selections in the settings window
+        config_handler.set_default_camera_index(config_settings_obj.default_camera_index)
+        config_handler.set_camera_width(config_settings_obj.camera_width)
+        config_handler.set_camera_height(config_settings_obj.camera_height)
+        config_handler.set_default_save_directory(config_settings_obj.default_save_directory)
+
+        # Verify one ADC input isn't mapped to two different sensors
+        used_ADC_inputs: List[
+            ValidADCInputs] = []  # Running "total" list of all the adc inputs we've encountered so far
+        # Loop through all pressure sensors
+        for temperature_sensor in config_settings_obj.temperature_sensor_list:
+            # Throw error if this ADC input isn't already mapped to a sensor
+            if temperature_sensor.adc_input in used_ADC_inputs:
+                # TODO raise custom exception type instead? or show a popup window with the warning
+                raise Exception("ADC Input {} mapped to two sensors!".format(temperature_sensor.adc_input.value))
+            # Else add ADC input to list of used ADC inputs
+            else:
+                used_ADC_inputs.append(temperature_sensor.adc_input)
+
+        # Loop through all temperature sensors
+        for pressure_sensor in config_settings_obj.pressure_sensor_list:
+            # Throw error if this ADC input isn't already mapped to a sensor
+            if pressure_sensor.adc_input in used_ADC_inputs:
+                # TODO raise custom exception type instead? or show a popup window with the warning
+                raise Exception("ADC Input {} mapped to two sensors!".format(pressure_sensor.adc_input.value))
+            # Else add ADC input to list of used ADC inputs
+            else:
+                used_ADC_inputs.append(pressure_sensor.adc_input)
+
+        # Update all the temperature sensors
+        for temperature_sensor in config_settings_obj.temperature_sensor_list:
+            config_handler.set_temperature_sensor(temperature_sensor)
+
+        # Update all the pressure sensors
+        for pressure_sensor in config_settings_obj.pressure_sensor_list:
+            config_handler.set_pressure_sensor(pressure_sensor)
+
+        # Save the new settings
+        config_handler.write_config_file()
+
+        # Close the settings window
+        dpg.configure_item(settings_window_tag, show=False)
+
+    # Create Settings GUI Window
     with dpg.window(label="Settings", tag=settings_window_tag, show=False, modal=True,
                     width=settings_window_width, height=settings_window_height,
                     pos=[int(viewport_width / 2 - settings_window_width / 2),
@@ -147,36 +223,8 @@ def create_settings_pop_window(config_handler: IConfigHandler, settings_window_t
         dpg.add_separator()
         dpg.add_spacer(height=5)
         with dpg.group(horizontal=True):
-            # TODO the get_value call doesn't appear to get the selected value from the combo boxes
             # OK button callback user data contains all settings data that gets passed to the configHandler
-            dpg.add_button(label="OK", width=75,
-                           callback=_settings_ok_button_callback,
-                           user_data={"config_handler": config_handler,
-                                      "settings_window_tag": settings_window_tag,
-                                      "config_settings_obj": ConfigSettings(
-                                          # Todo looks like I may have to change all the combo box things to use callbacks
-                                          #     which set globals because the method used here appears to just return
-                                          #     the default values
-                                          default_camera_index=int(dpg.get_value(default_camera_index_selection_tag)[-1]),
-                                          camera_width=dpg.get_value(camera_width_selection_tag),
-                                          camera_height=dpg.get_value(camera_height_selection_tag),
-                                          default_save_directory=dpg.get_value(current_dir_location_text_tag),
-                                          temperature_sensor_list=[TemperatureSensorConfigData(
-                                              name=temperature_sensor.name,
-                                              descr_string=temperature_sensor.descr_string,
-                                              adc_input=ValidADCInputs(dpg.get_value(temperature_sensor.name + "_adc_selection_tag")),
-                                              amplifier_gain=temperature_sensor.amplifier_gain,
-                                          ) for temperature_sensor in temperature_sensors],
-                                          pressure_sensor_list=[PressureSensorConfigData(
-                                              name=pressure_sensor.name,
-                                              descr_string=pressure_sensor.descr_string,
-                                              adc_input=ValidADCInputs(dpg.get_value(pressure_sensor.name + "_adc_selection_tag")),
-                                              amplifier_gain=pressure_sensor.amplifier_gain,
-                                              sensor_gain=pressure_sensor.sensor_gain,
-                                              sensor_offset=pressure_sensor.sensor_offset,
-                                          ) for pressure_sensor in pressure_sensors]
-                                      )}
-                           )
+            dpg.add_button(label="OK", width=75, callback=_settings_ok_button_callback)
             dpg.add_button(label="Cancel", width=75,
                            callback=lambda: dpg.configure_item(settings_window_tag, show=False))
 
@@ -217,67 +265,3 @@ def _directory_selector_callback(sender, app_data, user_data: _DirSelectorCallba
 
     # Show the settings window again
     dpg.configure_item(settings_window_tag, show=True)
-
-
-def _settings_ok_button_callback(sender, app_data, user_data: _OKButtonCallbackDict):
-    """
-    This is called when the user clicks the "OK" button at the bottom of the settings window
-    We now need to save all the settings
-
-    :param sender: the tag of the UI element (the file selection dialog window)
-    :param app_data: None
-    :type app_data: None
-    :param user_data: (dictionary) containing: config_handler object, settings window tag, and a ConfigSettings object
-    :type user_data: _OKButtonCallbackDict
-    :return: None
-    """
-    # Unpack/alias values from user_data
-    config_handler = user_data["config_handler"]
-    settings_window_tag = user_data["settings_window_tag"]
-    config_settings_obj = user_data["config_settings_obj"]
-
-    # todo temp print debugging, remove when done debugging
-    #   It appears the config settings being passed in here are not correct, they are the original, not the updated ones
-    print(config_settings_obj)
-
-    # Update all basic settings on config handler to reflect the user's selections in the settings window
-    config_handler.set_default_camera_index(config_settings_obj.default_camera_index)
-    config_handler.set_camera_width(config_settings_obj.camera_width)
-    config_handler.set_camera_height(config_settings_obj.camera_height)
-    config_handler.set_default_save_directory(config_settings_obj.default_save_directory)
-
-    # Verify one ADC input isn't mapped to two different sensors
-    used_ADC_inputs: List[ValidADCInputs] = []  # Running "total" list of all the adc inputs we've encountered so far
-    # Loop through all pressure sensors
-    for temperature_sensor in config_settings_obj.temperature_sensor_list:
-        # Throw error if this ADC input isn't already mapped to a sensor
-        if temperature_sensor.adc_input in used_ADC_inputs:
-            # TODO raise custom exception type instead? or show a popup window with the warning
-            raise Exception("ADC Input {} mapped to two sensors!".format(temperature_sensor.adc_input.value))
-        # Else add ADC input to list of used ADC inputs
-        else:
-            used_ADC_inputs.append(temperature_sensor.adc_input)
-
-    # Loop through all temperature sensors
-    for pressure_sensor in config_settings_obj.pressure_sensor_list:
-        # Throw error if this ADC input isn't already mapped to a sensor
-        if pressure_sensor.adc_input in used_ADC_inputs:
-            # TODO raise custom exception type instead? or show a popup window with the warning
-            raise Exception("ADC Input {} mapped to two sensors!".format(pressure_sensor.adc_input.value))
-        # Else add ADC input to list of used ADC inputs
-        else:
-            used_ADC_inputs.append(pressure_sensor.adc_input)
-
-    # Update all the temperature sensors
-    for temperature_sensor in config_settings_obj.temperature_sensor_list:
-        config_handler.set_temperature_sensor(temperature_sensor)
-
-    # Update all the pressure sensors
-    for pressure_sensor in config_settings_obj.pressure_sensor_list:
-        config_handler.set_pressure_sensor(pressure_sensor)
-
-    # Save the new settings
-    config_handler.write_config_file()
-
-    # Close the settings window
-    dpg.configure_item(settings_window_tag, show=False)
