@@ -33,7 +33,7 @@ class INIConfigHandler(IConfigHandler):
         self.description_strings_section = self.config["Description Strings"]
 
     def get_default_save_directory(self) -> str:
-        return self.general_section.get("default_save_location").strip('"')
+        return self.general_section.get("default_save_directory").strip('"')
 
     def get_default_camera_index(self) -> int:
         return self.general_section.getint("default_camera_index")
@@ -83,7 +83,7 @@ class INIConfigHandler(IConfigHandler):
         return temperature_sensor_list
 
     def set_default_save_directory(self, filepath: str):
-        self.general_section["default_save_location"] = str(filepath)
+        self.general_section["default_save_directory"] = str(filepath)
 
     def set_default_camera_index(self, index: int):
         self.general_section["default_camera_index"] = str(index)

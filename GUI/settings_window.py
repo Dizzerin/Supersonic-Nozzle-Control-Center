@@ -84,6 +84,11 @@ def create_settings_pop_window(config_handler: IConfigHandler, settings_window_t
         config_handler.set_default_camera_index(config_settings_obj.default_camera_index)
         config_handler.set_camera_width(config_settings_obj.camera_width)
         config_handler.set_camera_height(config_settings_obj.camera_height)
+        # TODO we should also verify these things on startup?  Or before trying to write to it at least
+        # TODO could do more verifications on this to make sure this directory exists etc.
+        #   Also remember we can use the warning_window_tag
+        #   window and its warning_window_text to show the error status to the user (see what we do below in the event
+        #   of an ADC input mapped to two sensors.
         config_handler.set_default_save_directory(config_settings_obj.default_save_directory)
 
         # Verify one ADC input isn't mapped to two different sensors

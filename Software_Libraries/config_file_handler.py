@@ -4,7 +4,8 @@ import configparser
 from typing import List
 
 
-# TODO implement use of this!!! Also maybe make everything more dynamic based off the information this returns
+# TODO make this so when it saves/writes a file it retain comments that were in it originally if possible somehow
+# TODO Maybe make everything more dynamic based off the information this returns
 #  i.e. the number of sensors etc.
 # TODO Note: should re-read file without writing it if setting are not applied, otherwise the settings that were changed
 #            will remain a part of this class and get handed around but be incorrect because the user didn't actually
@@ -128,7 +129,7 @@ class ConfigHandler(IConfigHandler):
         return self._temperature_sensor_list
 
     def set_default_save_directory(self, filepath: str):
-        self._config.set("General", "default_save_location", str(filepath))
+        self._config.set("General", "default_save_directory", str(filepath))
 
     def set_default_camera_index(self, index: int):
         self._config.set("General", "default_camera_index", str(index))
