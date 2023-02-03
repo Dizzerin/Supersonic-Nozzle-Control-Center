@@ -22,6 +22,8 @@ def create_settings_pop_window(config_handler: IConfigHandler, settings_window_t
     # Local UI element widths
     settings_window_width = 800
     settings_window_height = 500
+    warning_window_width = 300
+    warning_window_height = 80
     settings_combo_box_width = 80
     settings_text_width = 200
     directory_selector_window_width = 800
@@ -32,6 +34,8 @@ def create_settings_pop_window(config_handler: IConfigHandler, settings_window_t
     camera_width_selection_tag = "camera_width_tag"
     camera_height_selection_tag = "camera_height_tag"
     current_dir_location_text_tag = "current_dir_location_text_tag"
+    warning_popup_tag = "warning_popup_tag"
+    warning_popup_text_tag = "warning_popup_text_tag"
     # Note: all ADC selection combo box tags are set dynamically using the following format
     # tag = pressure_sensor.name.value + "_adc_selection_tag"
 
@@ -89,8 +93,13 @@ def create_settings_pop_window(config_handler: IConfigHandler, settings_window_t
         for temperature_sensor in config_settings_obj.temperature_sensor_list:
             # Throw error if this ADC input isn't already mapped to a sensor
             if temperature_sensor.adc_input in used_ADC_inputs:
-                # TODO raise custom exception type instead? or show a popup window with the warning
-                raise Exception("ADC Input {} mapped to two sensors!".format(temperature_sensor.adc_input.value))
+                # ERROR: ADC input mapped to two sensors!
+                # Show popup with warning and edit text contents of window
+                dpg.set_value(warning_popup_text_tag,
+                              "ADC Input: \"{}\" mapped to two sensors!".format(temperature_sensor.adc_input.value) +
+                              "\r\nPlease correct this and try again.")
+                dpg.configure_item(warning_popup_tag, show=True)
+                return  # Don't save the data!
             # Else add ADC input to list of used ADC inputs
             else:
                 used_ADC_inputs.append(temperature_sensor.adc_input)
@@ -99,8 +108,13 @@ def create_settings_pop_window(config_handler: IConfigHandler, settings_window_t
         for pressure_sensor in config_settings_obj.pressure_sensor_list:
             # Throw error if this ADC input isn't already mapped to a sensor
             if pressure_sensor.adc_input in used_ADC_inputs:
-                # TODO raise custom exception type instead? or show a popup window with the warning
-                raise Exception("ADC Input {} mapped to two sensors!".format(pressure_sensor.adc_input.value))
+                # ERROR: ADC input mapped to two sensors!
+                # Show popup with warning and edit text contents of window
+                dpg.set_value(warning_popup_text_tag,
+                              "ADC Input: \"{}\" mapped to two sensors!".format(pressure_sensor.adc_input.value) +
+                              "\r\nPlease correct this and try again.")
+                dpg.configure_item(warning_popup_tag, show=True)
+                return  # Don't save the data!
             # Else add ADC input to list of used ADC inputs
             else:
                 used_ADC_inputs.append(pressure_sensor.adc_input)
@@ -119,11 +133,23 @@ def create_settings_pop_window(config_handler: IConfigHandler, settings_window_t
         # Close the settings window
         dpg.configure_item(settings_window_tag, show=False)
 
+    # Create popup that can be used for warnings (hidden by default)
+    with dpg.window(label="Error!", modal=True, show=False, tag=warning_popup_tag,
+                    width=warning_window_width, height=warning_window_height,
+                    pos=[int(viewport_width / 2 - warning_window_width / 2),
+                         int(viewport_height / 2 - warning_window_height / 2)]):
+        dpg.add_text("Unknown error", tag=warning_popup_text_tag)
+        dpg.add_spacer()
+        dpg.add_button(label="OK",
+                       pos=[warning_window_width / 2 - 15, warning_window_height - 10],
+                       callback=lambda: dpg.configure_item(warning_popup_tag, show=False))
+
     # Create Settings GUI Window
-    with dpg.window(label="Settings", tag=settings_window_tag, show=False, modal=True,
+    with dpg.window(label="Settings", tag=settings_window_tag, show=False,
                     width=settings_window_width, height=settings_window_height,
                     pos=[int(viewport_width / 2 - settings_window_width / 2),
                          int(viewport_height / 2 - settings_window_height / 2)]):
+
         # Notice at top
         dpg.add_text("Note: None of the changes you make here will be saved until you select \"OK\" at the bottom!",
                      color=(247, 40, 40, 255))

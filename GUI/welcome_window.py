@@ -59,6 +59,7 @@ class WelcomeWindow(IWindow):
 
         # Build main welcome window
         with dpg.window(tag=self.tag(), show=True):
+
             # Add background image
             dpg.add_image("background_image", pos=[0, 0])
 
