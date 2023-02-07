@@ -7,7 +7,7 @@ from Software_Libraries.config_file_handler import ConfigHandler
 class TestINIConfigFileHandler(TestCase):
     def test_some_stuff(self):
         # Create config handler class
-        cfh = ConfigHandler("../config.cfg")
+        cfh = ConfigHandler("config.cfg")
 
         # Test reading in some data
         pressure_sensors = cfh.get_pressure_sensors()

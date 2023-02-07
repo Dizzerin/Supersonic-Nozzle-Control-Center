@@ -12,7 +12,7 @@ from Software_Libraries.config_file_handler import ConfigHandler
 class TestConfigFileHandler(TestCase):
     def test_config_handler(self):
         # Create config handler class
-        cfh = ConfigHandler("../config2.cfg")
+        cfh = ConfigHandler("../config.cfg")
 
         # Test reading in some data
         pressure_sensors = cfh.get_pressure_sensors()

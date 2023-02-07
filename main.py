@@ -6,7 +6,7 @@ from GUI import GUI_manager
 
 if __name__ == '__main__':
 
-    config_file_path = path.join(path.dirname(__file__), 'config2.cfg')
+    config_file_path = path.join(path.dirname(__file__), 'config.cfg')
 
     # Instantiate data providers
     camera_data_provider = PCBCamera(1024, 768)
