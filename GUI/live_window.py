@@ -1,22 +1,26 @@
 import dearpygui.dearpygui as dpg
 from Software_Interfaces.window_interface import IWindow
 from Hardware_Interfaces.ADC_data_provider_interface import IADCDataProvider
+from Hardware_Interfaces.ADC_data_writer_interface import IADCDataWriter
 from Hardware_Interfaces.camera_data_provider_interface import ICameraDataProvider
+from datetime import datetime
 from GUI import GUI_manager
 
 
 class LiveWindow(IWindow):
-    def __init__(self, camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCDataProvider):
+    def __init__(self, camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCDataProvider, ADC_data_writer: IADCDataWriter):
         # Call super class's init
         super(LiveWindow, self).__init__()
 
         # Local vars
         self.cam = camera_data_provider
-        self.ADC = ADC_data_provider
+        self.ADC_data_provider = ADC_data_provider
+        self.ADC_data_writer = ADC_data_writer
+        self.recording_in_progress = False
 
         # TODO change the way this is handled?
         # TODO only store the amount of data necessary for display (so it doesn't continually increase memory consumption)
-        # TODO auto rescale graphs?
+        # TODO auto rescale graph's y-axes?
         # Plot sizing and data arrays
         # Global pressures and other plot data
         self.time_data = [0]
@@ -52,6 +56,35 @@ class LiveWindow(IWindow):
     def include_title_bar(self) -> bool:
         return True
 
+    def _recording_button_callback(self, sender, data, user_data):
+        # If not recording... start recording
+        # TODO Ask for filename at this point??? and provide it to the recording function??
+        #   Might need to create two buttons (one for start and one for stop recording) and
+        #   hide and show them since it doesn't seem possible to change the label (text) on
+        #   a button
+        # TODO you can't do a second recording as is, fix this
+        # TODO also note that the calibration is not setup and the conversion stuff is probably
+        #   right but hasn't been verified.
+
+        if not self.recording_in_progress:
+            print("Starting recording") # TODO REMOVE
+            # Set recording start time
+            self.ADC_data_writer.set_recording_start_time()
+            # Set flag indicating we are recording
+            self.recording_in_progress = True
+            # Change the text on the recording button to stop recording
+            dpg.set_value(self.recording_button_tag, "Stop Recording")
+
+        # Else if recording already... stop recording
+        else:
+            print("Stopping recording") # TODO REMOVE
+            # Set flag indicating we are not recording
+            self.recording_in_progress = False
+            # Save file
+            self.ADC_data_writer.save_file()
+            # Change the text on the recording button to start recording
+            dpg.set_value(self.recording_button_tag, "Start Recording")
+
     def _update_video(self):
         raw_data = self.cam.get_next_frame()
         dpg.set_value(self.video_texture_tag, raw_data)
@@ -71,7 +104,7 @@ class LiveWindow(IWindow):
             self.axis_end_time += 1
 
         # Read new data from ADC
-        ADC_data = self.ADC.get_next_data_row()
+        ADC_data = self.ADC_data_provider.get_next_data_row()
         self.t0_y_data.append(ADC_data.t0)
         self.p0_y_data.append(ADC_data.p0)
         self.p1_y_data.append(ADC_data.p1)
@@ -90,6 +123,15 @@ class LiveWindow(IWindow):
     def update(self):
         self._update_video()
         self._update_plots()
+
+        # Write new data row if recording is in progress
+        # TODO THIS SHOULD BE DONE DIFFERENT
+        #   Should use the same data that was placed on the graphs -- should probably also slow this down?
+        #   also want to be able to adjust the sampling rate
+        if self.recording_in_progress:
+            # Write new recording line
+            last_sample_time = datetime.now()
+            self.ADC_data_writer.write_ADC_data(self.ADC_data_provider.get_next_data_row(), last_sample_time)
 
     def create(self, viewport_width: int, viewport_height: int):
         # Local vars
@@ -147,12 +189,14 @@ class LiveWindow(IWindow):
                         button_height = 35
                         button_x_spacing = 300
                         with dpg.group(horizontal=True):
+                            # TODO Set callback
                             dpg.add_button(label="Calibrate Sensors", width=button_width, height=button_height,
                                            pos=[button_x_start + button_x_spacing*0, button_y],
                                            tag=self.calibrate_button_tag)
                             dpg.add_button(label="Start Recording", width=button_width, height=button_height,
                                            pos=[button_x_start + button_x_spacing*1, button_y],
-                                           tag=self.recording_button_tag)
+                                           tag=self.recording_button_tag,
+                                           callback=self._recording_button_callback)
 
                 # Right-hand side group
                 with dpg.group(horizontal=False, pos=[viewport_width // 2 + 80, 60]) as right_group:
@@ -186,7 +230,6 @@ class LiveWindow(IWindow):
                             make all plot areas appear equal
                         """
                         # TODO set each plot's y axis limits?
-                        # TODO add tooltips to plots with further explanation of where that pressure is occurring
                         # TODO Add text next to the plots with the current numerical value (and update it continually)
                         # Create pressure plots
                         for i in range(self.num_pressure_plots):
@@ -237,7 +280,7 @@ class LiveWindow(IWindow):
                     dpg.bind_item_theme(plot_group, plot_group_container_theme)
 
         # Set ADC's data acquisition start time
-        self.ADC.set_acquisition_start_time()
+        self.ADC_data_provider.set_acquisition_start_time()
 
         # Indicate that this window has been created
         self.is_created = True

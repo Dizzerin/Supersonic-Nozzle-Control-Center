@@ -30,28 +30,28 @@ class Ue9LabJackADC(IADCDataProvider):
         }
 
         # Computed/read values
-        self.atmospheric_psi = 14.26  # (P_atm in documentation, units: psi, defaults to avg pressure at 800ft)
-        self.amplifier_offsets = np.array([0.0, 0.0, 0.0, 0.0, 0.0])  # (ba in documentation, units: V)
+        self.atmospheric_psi__p_atm = 14.26  # (P_atm in documentation, units: psi, defaults to avg pressure at 800ft)
+        self.amplifier_offsets__ba = np.array([0.0, 0.0, 0.0, 0.0, 0.0])  # (ba in documentation, units: V)
 
         # Stored offsets and gains
-        self.amplifier_gains = np.array([0.049094016,  # (ma in documentation, units: V/mv)
-                                         0.048944909,
-                                         0.049298768,
-                                         0.049041140,
-                                         0.048913343
-                                         ])
-        self.sensor_offsets = np.array([-0.006,  # (bs in documentation, units: mV)
-                                        0.0180,
-                                        0.0220,
-                                        -0.206,
-                                        0.0140
-                                        ])
-        self.sensor_gains = np.array([0.100665,  # (ms in documentation, units: mV/psi)
-                                      0.100508,
-                                      0.200050,
-                                      1.003380,
-                                      2.019160
-                                      ])
+        self.amplifier_gains__ma = np.array([0.049094016,  # (ma in documentation, units: V/mv)
+                                             0.048944909,
+                                             0.049298768,
+                                             0.049041140,
+                                             0.048913343
+                                             ])
+        self.sensor_offsets__bs = np.array([-0.006,  # (bs in documentation, units: mV)
+                                            0.0180,
+                                            0.0220,
+                                            -0.206,
+                                            0.0140
+                                            ])
+        self.sensor_gains__ms = np.array([0.100665,  # (ms in documentation, units: mV/psi)
+                                          0.100508,
+                                          0.200050,
+                                          1.003380,
+                                          2.019160
+                                          ])
 
     def initialize(self):
         # Initialize LabJack ADC
@@ -60,9 +60,9 @@ class Ue9LabJackADC(IADCDataProvider):
         except LabJackException as exception:
             self.is_initialized = False
         else:
-            # Temp calibrate with estimated default calibration value so live data can be displayed before actual
-            # calibration takes place
-            self.calibrate(self.atmospheric_psi)
+            # For now initialize calibration with estimated default calibration value
+            # so live data can be displayed before actual calibration takes place
+            self.calibrate(self.atmospheric_psi__p_atm)
             # Manually reset is_calibrated to false since official calibration hasn't taken place
             self.is_calibrated = False
 
@@ -80,14 +80,14 @@ class Ue9LabJackADC(IADCDataProvider):
         # Use the given atmospheric pressure to calculate the proper adc_offsets
 
         # Store atmospheric_pressure
-        self.atmospheric_psi = atmospheric_psi
+        self.atmospheric_psi__p_atm = atmospheric_psi
 
         # Get current adc readings
         raw_adc_readings = self._get_raw_readings()
 
         # Compute adc offsets
-        self.amplifier_offsets = self.amplifier_gains * (raw_adc_readings[1:] / self.amplifier_gains - (
-                self.sensor_gains * self.atmospheric_psi + self.sensor_offsets))
+        self.amplifier_offsets__ba = self.amplifier_gains__ma * (raw_adc_readings[1:] / self.amplifier_gains__ma - (
+                self.sensor_gains__ms * self.atmospheric_psi__p_atm + self.sensor_offsets__bs))
 
         # TODO compute adc_offset for temperature as well
 
@@ -108,15 +108,16 @@ class Ue9LabJackADC(IADCDataProvider):
                 self.device.getAIN(self.input_map["p4"])
                 ]
 
-    def _convert_raw_readings(self, raw_adc_readings) -> custom_types.SensorData:
+    def _convert_raw_readings(self, raw_adc_readings__v) -> custom_types.SensorData:
         # Converted data (units: deg celsius, psi, psi, psi, psi, psi)
-        converted_pressures = ((raw_adc_readings[1:] - self.amplifier_offsets) / self.amplifier_gains - self.sensor_offsets) / (
-            self.sensor_gains)
+        converted_pressures = ((raw_adc_readings__v[1:] - self.amplifier_offsets__ba) / self.amplifier_gains__ma - self.sensor_offsets__bs) / (
+            self.sensor_gains__ms)
 
         # TODO convert first sensor reading as well which is the temperature
+        converted_temperature = raw_adc_readings__v[0]
 
         # Store the final converted data in a SensorData object
-        sensor_data = custom_types.SensorData(raw_adc_readings[0],
+        sensor_data = custom_types.SensorData(converted_temperature,
                                               converted_pressures[0],
                                               converted_pressures[1],
                                               converted_pressures[2],

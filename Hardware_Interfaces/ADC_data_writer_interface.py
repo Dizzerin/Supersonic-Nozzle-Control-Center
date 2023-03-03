@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from Custom_Types import custom_types
+from Custom_Types.custom_types import SensorData
 from datetime import datetime
 
 
@@ -14,5 +14,10 @@ class IADCDataWriter(ABC):
         pass
 
     @abstractmethod
-    def write_ADC_data(self, data: custom_types.SensorData, time: datetime) -> bool:
+    def write_ADC_data(self, sensor_data: SensorData, time: datetime) -> bool:
         pass
+
+    @abstractmethod
+    def save_file(self):
+        pass
+
