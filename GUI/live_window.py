@@ -57,33 +57,28 @@ class LiveWindow(IWindow):
         return True
 
     def _recording_button_callback(self, sender, data, user_data):
-        # If not recording... start recording
-        # TODO Ask for filename at this point??? and provide it to the recording function??
-        #   Might need to create two buttons (one for start and one for stop recording) and
-        #   hide and show them since it doesn't seem possible to change the label (text) on
-        #   a button
         # TODO you can't do a second recording as is, fix this
         # TODO also note that the calibration is not setup and the conversion stuff is probably
         #   right but hasn't been verified.
 
+        # If not recording... start recording
         if not self.recording_in_progress:
-            print("Starting recording") # TODO REMOVE
+            # TODO Ask for filename at this point??? and provide it to the recording function??
             # Set recording start time
             self.ADC_data_writer.set_recording_start_time()
             # Set flag indicating we are recording
             self.recording_in_progress = True
             # Change the text on the recording button to stop recording
-            dpg.set_value(self.recording_button_tag, "Stop Recording")
+            dpg.configure_item(self.recording_button_tag, label="Stop Recording")
 
         # Else if recording already... stop recording
         else:
-            print("Stopping recording") # TODO REMOVE
             # Set flag indicating we are not recording
             self.recording_in_progress = False
             # Save file
             self.ADC_data_writer.save_file()
             # Change the text on the recording button to start recording
-            dpg.set_value(self.recording_button_tag, "Start Recording")
+            dpg.configure_item(self.recording_button_tag, label="Start Recording")
 
     def _update_video(self):
         raw_data = self.cam.get_next_frame()
