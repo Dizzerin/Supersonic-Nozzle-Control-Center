@@ -36,18 +36,18 @@ class ReadDataInterface:
     pass
 
 
-class RecordingWindow(IWindow):
+class LoggingWindow(IWindow):
     @property
     def name(self):
-        self._name = "RecordingWindow"
+        self._name = "LoggingWindow"
 
     def __init__(self, read: ReadDataInterface):
-        self._name = "RecordingWindow"
+        self._name = "LoggingWindow"
         self._read = read
 
     def _goto_window_callback(self, new_window: Type[IWindow]):
-        RecordingWindow.show(new_window)
-        RecordingWindow.set_primary(new_window)
+        LoggingWindow.show(new_window)
+        LoggingWindow.set_primary(new_window)
         self.hide()
 
     def create(self):
@@ -72,7 +72,7 @@ class DearPyGuiSelector(IFileSelector):
             dpg.add_file_dialog(directory_selector=True, show=True, )
 
 
-class SelectRecordingFileUseCase:
+class SelectLoggingFileUseCase:
     def __init__(self, selector: IFileSelector):
         self._selector = selector
 
@@ -92,11 +92,11 @@ class WelcomeWindow(IWindow):
         self._name = "WelcomeWindow"
 
     def _goto_window_callback(self, new_window: Type[IWindow]):
-        RecordingWindow.show(new_window)
-        RecordingWindow.set_primary(new_window)
+        LoggingWindow.show(new_window)
+        LoggingWindow.set_primary(new_window)
         self.hide()
 
     def create(self):
         with dpg.window(tag=self._name):
             dpg.add_text("Welcome")
-            dpg.add_button(label="Record a new session", callback=lambda: self._goto_window_callback(RecordingWindow))
+            dpg.add_button(label="Record a new session", callback=lambda: self._goto_window_callback(LoggingWindow))

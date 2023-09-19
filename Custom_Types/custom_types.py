@@ -27,11 +27,11 @@ class SensorData:
 #     Structure defining the values contained in a data row
 #     This "struct" is used to contain all the data associated with what gets written by the ADC data writer
 #     Each row has a timestamp associated with it, a temperature, and a number of pressure readings
-#     recording_elapsed_time is the time since the ADC data recording (writing to file etc.) began
+#     logging_elapsed_time is the time since the ADC data logging (writing to file etc.) began
 #     t is a temperature
 #     p's are pressures
 #     """
-#     recording_elapsed_time: datetime
+#     logging_elapsed_time: datetime
 #     t0: float
 #     p0: float
 #     p1: float

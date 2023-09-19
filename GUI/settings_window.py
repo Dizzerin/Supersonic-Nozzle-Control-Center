@@ -229,7 +229,7 @@ def create_settings_pop_window(config_handler: IConfigHandler, settings_window_t
         default_save_directory_text_tag = dpg.add_text("Default Save Directory:")
         # Tooltip
         with dpg.tooltip(parent=default_save_directory_text_tag):
-            dpg.add_text("This specifies the default directory where video recordings and exported data will"
+            dpg.add_text("This specifies the default directory where video loggings and exported data will"
                          "be saved to.")
 
         with dpg.group(horizontal=True):
@@ -263,7 +263,7 @@ def create_settings_pop_window(config_handler: IConfigHandler, settings_window_t
 def _directory_selector_callback(sender, app_data, user_data: _DirSelectorCallbackDict):
     """
     This is called whenever clicks the "OK" button in the file selector dialog window that can be accessed
-    from settings (when the user wishes to specify the default save directory for recordings and exported data)
+    from settings (when the user wishes to specify the default save directory for data logging)
 
     :param sender: the tag of the UI element (the file selection dialog window)
     :param app_data: (dictionary) -- with lots of stuff in it, just examine it for yourself

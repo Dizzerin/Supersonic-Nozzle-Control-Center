@@ -10,7 +10,7 @@ class IADCDataWriter(ABC):
         self.file = file
 
     @abstractmethod
-    def set_recording_start_time(self):
+    def set_logging_start_time(self):
         pass
 
     @abstractmethod
