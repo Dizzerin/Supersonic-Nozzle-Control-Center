@@ -18,7 +18,7 @@ class LiveWindow(IWindow):
         self.ADC_data_writer = ADC_data_writer
         self.logging_in_progress = False
 
-        # TODO change the way this is handled?
+        # TODO change the way this is handled? -- if changing, may also need to change the reset_plots method
         # TODO only store the amount of data necessary for display (so it doesn't continually increase memory consumption)
         # TODO auto rescale graph's y-axes?
         # Plot sizing and data arrays
@@ -47,6 +47,23 @@ class LiveWindow(IWindow):
         self.logging_button_tag = "logging_button"
         self.calibrate_button_tag = "calibrate_button"
         self.time_text_box_tag = "time_text_box_tag"
+
+    # Called whenever switching to this screen
+    def show(self):
+        # Reset camera focus settings (enable autofocus) and brightness settings
+        self.cam.reset_all_brightness_and_focus_settings(self.focus_slider_tag, self.AF_enable_button_tag, self.brightness_slider_tag)
+        # Reset plots and plot values and data
+        self._reset_plots()
+
+        # Call super class's show function
+        super(LiveWindow, self).show()
+
+    # Called whenever switching away from this screen to another one
+    def hide(self):
+        # TODO more cleanup tasks when leaving this screen? Stop things etc.? Stop logging? etc.?
+        self.logging_in_progress = False
+        # Call super class's hide function
+        super(LiveWindow, self).hide()
 
     def is_created(self) -> bool:
         return self.is_created
@@ -123,6 +140,19 @@ class LiveWindow(IWindow):
         self._update_plot("p2_series", "p2_x_axis", "p2_text_box", self.p2_y_data)
         self._update_plot("p3_series", "p3_x_axis", "p3_text_box", self.p3_y_data)
         self._update_plot("p4_series", "p4_x_axis", "p4_text_box", self.p4_y_data)
+
+    def _reset_plots(self):
+        # Reset plot data
+        self.time_data = [0]
+        self.axis_start_time = 0
+        self.axis_end_time = self.axis_duration
+        self.t0_y_data = []
+        self.p0_y_data = []
+        self.p1_y_data = []
+        self.p2_y_data = []
+        self.p3_y_data = []
+        self.p4_y_data = []
+        self._update_plots()
 
     def update(self):
         self._update_video()

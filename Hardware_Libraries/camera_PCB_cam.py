@@ -19,12 +19,7 @@ class PCBCamera(ICameraDataProvider):
         self.height = height        # Desired height
         self.actual_width = None    # Actual width that could be set
         self.actual_height = None   # Actual height that could be set
-        # TODO have these stored in a config file?
-        self.default_focus = 178
-        self.default_exposure = -4
-        # TODO make the GUI use these focus and exposure vars
-        self.focus = self.default_focus
-        self.exposure = self.default_exposure
+        # TODO (Maybe) have default brightness, exposure and focus values?  Store the current settings/values heres?  Get the defaults from config file?
 
         # Initialize PCB Camera Capture
         self.capture = None
@@ -43,7 +38,7 @@ class PCBCamera(ICameraDataProvider):
         #   i.e. there can be emtpy indexes between valid cameras
         #   This method may seem clunky, but this is the best way right now that is os
         #   independent that I could find online
-        # TODO THIS ROUTINE TAKES A LONG TIME =(
+        # TODO (Maybe) THIS ROUTINE TAKES A LONG TIME =( -- See if there's any way to make it faster
         index = 0
         arr = []
         i = 10
@@ -66,8 +61,10 @@ class PCBCamera(ICameraDataProvider):
         else:
             self.capture = cv.VideoCapture(camera_index)
 
+        # Set autofocus and brightness (though these settings should be default)
+        self.capture.set(cv.CAP_PROP_AUTOFOCUS, 1)
+        self.capture.set(cv.CAP_PROP_BRIGHTNESS, 0)
         # Try setting resolution
-        # Todo get this from config file and test with actual camera we will be using
         self.capture.set(cv.CAP_PROP_FRAME_WIDTH, self.width)
         self.capture.set(cv.CAP_PROP_FRAME_HEIGHT, self.height)
         # Check if resolution was set
@@ -147,9 +144,25 @@ class PCBCamera(ICameraDataProvider):
             # Set slider to 0
             dpg.set_value(focus_slider_tag, value=0)
             # Update slider enabled status
-            # dpg.disable_item(focus_slider_tag)
+            #dpg.disable_item(focus_slider_tag)
         else:
             # Update camera setting
             self.capture.set(cv.CAP_PROP_AUTOFOCUS, 2)
             # Update slider enabled status
-            # dpg.enable_item(focus_slider_tag)
+            #dpg.enable_item(focus_slider_tag)
+
+    def reset_all_brightness_and_focus_settings(self, focus_slider_tag, AF_checkbox_tag, brightness_slider_tag):
+        self.AF_enabled = True
+        # Update camera setting
+        self.capture.set(cv.CAP_PROP_AUTOFOCUS, 1)
+        # Set slider to 0
+        dpg.set_value(focus_slider_tag, value=0)
+        # Update slider enabled status
+        #dpg.disable_item(focus_slider_tag)
+        # Check DearPyGui's AutoFocus checkbox
+        dpg.set_value(AF_checkbox_tag, value=True)
+
+        # Reset brightness to 0
+        self.capture.set(cv.CAP_PROP_BRIGHTNESS, 0)
+        # Update DearPyGUI's slider value to match
+        dpg.set_value(brightness_slider_tag, value=0)

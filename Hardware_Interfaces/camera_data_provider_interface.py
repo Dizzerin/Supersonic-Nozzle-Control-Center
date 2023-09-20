@@ -54,3 +54,7 @@ class ICameraDataProvider(ABC):
     @abstractmethod
     def set_autofocus_callback(self, sender, data, user_data):
         pass
+
+    @abstractmethod
+    def reset_all_brightness_and_focus_settings(self, focus_slider_tag, AF_checkbox_tag, brightness_slider_tag):
+        pass
