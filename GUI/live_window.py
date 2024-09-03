@@ -1,3 +1,4 @@
+import os
 import dearpygui.dearpygui as dpg
 from Software_Interfaces.window_interface import IWindow
 from Hardware_Interfaces.ADC_data_provider_interface import IADCDataProvider
@@ -8,14 +9,16 @@ from GUI import GUI_manager
 
 
 class LiveWindow(IWindow):
-    def __init__(self, camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCDataProvider, ADC_data_writer: IADCDataWriter):
+    def __init__(self, camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCDataProvider,
+                 ADC_data_writer: IADCDataWriter):
         # Call super class's init
         super(LiveWindow, self).__init__()
 
         # Local vars
         self.cam = camera_data_provider
         self.ADC_data_provider = ADC_data_provider
-        self.ADC_data_writer = ADC_data_writer
+        self.ADC_data_writer_class = ADC_data_writer
+        self.ADC_data_writer = None
         self.logging_in_progress = False
 
         # TODO change the way this is handled? -- if changing, may also need to change the reset_plots method
@@ -38,6 +41,10 @@ class LiveWindow(IWindow):
         self.p4_y_data = []
         self.is_created = False
 
+        # Other sizing vars
+        self.directory_selector_window_width = 800
+        self.directory_selector_window_height = 300
+
         # UI element tags
         self.video_texture_tag = "texture_tag"
         self.focus_slider_tag = "focus_slider_tag"
@@ -47,11 +54,14 @@ class LiveWindow(IWindow):
         self.logging_button_tag = "logging_button"
         self.calibrate_button_tag = "calibrate_button"
         self.time_text_box_tag = "time_text_box_tag"
+        self.directory_selector_tag = "directory_selector_tag"
+        self.dir_location_text_tag = "dir_location_text_tag"
 
     # Called whenever switching to this screen
     def show(self):
         # Reset camera focus settings (enable autofocus) and brightness settings
-        self.cam.reset_all_brightness_and_focus_settings(self.focus_slider_tag, self.AF_enable_button_tag, self.brightness_slider_tag)
+        self.cam.reset_all_brightness_and_focus_settings(self.focus_slider_tag, self.AF_enable_button_tag,
+                                                         self.brightness_slider_tag)
         # Reset plots and plot values and data
         self._reset_plots()
 
@@ -75,28 +85,40 @@ class LiveWindow(IWindow):
         return True
 
     def _logging_button_callback(self, sender, data, user_data):
-        # TODO you can't do a second logging as is, fix this
-        # TODO also note that the calibration is not setup and the conversion stuff is probably
+        # TODO note that the calibration is not setup and the conversion stuff is probably
         #   right but hasn't been verified.
 
-        # If not logging... start logging
+        # If not logging...
         if not self.logging_in_progress:
-            # TODO Ask for filename at this point??? and provide it to the logging function??
-            # Set logging start time
-            self.ADC_data_writer.set_logging_start_time()
-            # Set flag indicating we are logging
-            self.logging_in_progress = True
-            # Change the text on the logging button to stop logging
-            dpg.configure_item(self.logging_button_tag, label="Stop Logging")
+            # Show directory selector dialog (open to default directory)
+            dpg.configure_item(self.directory_selector_tag, show=True)
+            # Note: The selected directory is set via the _directory_selector_callback2() which in turn calls
+            # the _start_logging method once it gets the filepath to save the logged data to.
 
         # Else if logging already... stop logging
         else:
             # Set flag indicating we are not logging
             self.logging_in_progress = False
+            # Reset selected path
+            _user_selected_filepath = None
             # Save file
             self.ADC_data_writer.save_file()
             # Change the text on the logging button to start logging
             dpg.configure_item(self.logging_button_tag, label="Start Logging")
+            # Clear the ADC data writer object since we are done with it and will want to create a new one if we want to start logging again
+            self.ADC_data_writer = None
+
+    def start_logging(self, filepath):
+        # Create new data logger object
+        self.ADC_data_writer = self.ADC_data_writer_class(filepath)
+
+        # Start logging
+        # Set logging start time
+        self.ADC_data_writer.set_logging_start_time()
+        # Set flag indicating we are logging
+        self.logging_in_progress = True
+        # Change the text on the logging button to stop logging
+        dpg.configure_item(self.logging_button_tag, label="Stop Logging")
 
     def _update_video(self):
         raw_data = self.cam.get_next_frame()
@@ -110,11 +132,14 @@ class LiveWindow(IWindow):
         dpg.set_value(series_tag, [self.time_data, y_data])
 
         # Update text box displaying current value
-        current_label = dpg.get_value(text_box_tag)  # Capture the current text string (something like: "P0: -00.000 (psi)")
-        numeric_start_index = current_label.find(": ")+1
+        current_label = dpg.get_value(
+            text_box_tag)  # Capture the current text string (something like: "P0: -00.000 (psi)")
+        numeric_start_index = current_label.find(": ") + 1
         numeric_end_index = current_label.rfind(" (")
         # Update only the numeric portion of the string (with the latest measurement value) and retain the rest of the string
-        dpg.set_value(text_box_tag, current_label[:numeric_start_index+1] + "{:#8.3f}".format(y_data[-1]) + current_label[numeric_end_index:])
+        dpg.set_value(text_box_tag,
+                      current_label[:numeric_start_index + 1] + "{:#8.3f}".format(y_data[-1]) + current_label[
+                                                                                                numeric_end_index:])
 
     def _update_plots(self):
         # Update time and pressure and temperature values
@@ -217,18 +242,18 @@ class LiveWindow(IWindow):
                                            user_data=self.brightness_slider_tag,
                                            callback=self.cam.reset_brightness_callback)
                         # Logging and Calibration Buttons
-                        button_y = viewport_height//2 + viewport_height//4 - 30
-                        button_x_start = viewport_width//2 - viewport_width//4 - 100
+                        button_y = viewport_height // 2 + viewport_height // 4 - 30
+                        button_x_start = viewport_width // 2 - viewport_width // 4 - 100
                         button_width = 150
                         button_height = 35
                         button_x_spacing = 300
                         with dpg.group(horizontal=True):
                             # TODO Set callback
                             dpg.add_button(label="Calibrate Sensors", width=button_width, height=button_height,
-                                           pos=[button_x_start + button_x_spacing*0, button_y],
+                                           pos=[button_x_start + button_x_spacing * 0, button_y],
                                            tag=self.calibrate_button_tag)
                             dpg.add_button(label="Start Logging", width=button_width, height=button_height,
-                                           pos=[button_x_start + button_x_spacing*1, button_y],
+                                           pos=[button_x_start + button_x_spacing * 1, button_y],
                                            tag=self.logging_button_tag,
                                            callback=self._logging_button_callback)
 
@@ -292,7 +317,6 @@ class LiveWindow(IWindow):
                                     # Create line_series plots
                                     dpg.add_line_series(self.time_data, [], label="Temperature 0", tag="t0_series")
 
-
                     # Make "Live Data" label/title of the plot group look nicer
                     #   Set PlotPadding to 7 and LabelPadding to 11
                     # TODO figure out why this theme isn't applying to the plot_group
@@ -309,19 +333,20 @@ class LiveWindow(IWindow):
                         # Create text boxes for pressure plots
                         for i in range(self.num_pressure_plots):
                             dpg.add_text("P{}: {:#8.3f} (psi)".format(i, 0.0), tag="p{}_text_box".format(str(i)),
-                                         pos=[viewport_width//2 + 90 + self.plot_width,
-                                              55 + self.plot_height//2 + ((self.plot_height-8) * i)])
+                                         pos=[viewport_width // 2 + 90 + self.plot_width,
+                                              55 + self.plot_height // 2 + ((self.plot_height - 8) * i)])
 
                         # TODO is it C or Kelvin? -- Change everywhere
                         # Create text boxes for temperature plot
                         dpg.add_text("T0: {:#8.3f} (kelvin)".format(0.0), tag="t0_text_box",
-                                     pos=[viewport_width//2 + 90 + self.plot_width,
-                                          60 + self.plot_height//2 + ((self.plot_height-8) * self.num_pressure_plots)])
+                                     pos=[viewport_width // 2 + 90 + self.plot_width,
+                                          60 + self.plot_height // 2 + (
+                                                      (self.plot_height - 8) * self.num_pressure_plots)])
 
                         # Αdd time text box
                         dpg.add_text("Time: {:#6.3f} (s)".format(0.0), tag=self.time_text_box_tag,
-                                     pos=[viewport_width//2 + 90 + self.plot_width,
-                                          60 + ((self.plot_height-5) * (self.num_pressure_plots+1))])
+                                     pos=[viewport_width // 2 + 90 + self.plot_width,
+                                          60 + ((self.plot_height - 5) * (self.num_pressure_plots + 1))])
 
                     # Add tooltips to temperature and pressure plots and text boxes
                     # TODO use this from config file
@@ -343,8 +368,107 @@ class LiveWindow(IWindow):
                         with dpg.tooltip(parent=key):
                             dpg.add_text(value)
 
+            # Create Directory Selector Dialog (created hidden, but is shown when the select button is pressed)
+            dpg.add_file_dialog(label="Select save directory", tag=self.directory_selector_tag,
+                                directory_selector=False,
+                                callback=self._directory_selector_callback2,
+                                width=self.directory_selector_window_width,
+                                height=self.directory_selector_window_height,
+                                modal=True,
+                                default_filename="Recorded Data {}".format(datetime.now().strftime("%Y-%m-%d_%H-%M-%S")),   # Suggest default filename with year month day hour minute second
+                                show=False
+                                )
+
         # Set ADC's data acquisition start time
         self.ADC_data_provider.set_acquisition_start_time()
 
         # Indicate that this window has been created
         self.is_created = True
+
+    def _show_confirmation_window(self, file_path):
+        # Determine viewport size
+        viewport_width = dpg.get_viewport_client_width()
+        viewport_height = dpg.get_viewport_client_height()
+
+        # Window size
+        window_width = 200
+        window_height = 120
+
+        # Calculate center position
+        x_position = (viewport_width - window_width) // 2
+        y_position = (viewport_height - window_height) // 2
+
+        def on_yes(sender, app_data):
+            # Delete the existing file
+            if os.path.isfile(file_path):
+                try:
+                    os.remove(file_path)
+                    print(f"File '{file_path}' has been deleted (overwriting file).")
+                except Exception as e:
+                    print(f"An error occurred while deleting the file: {e}")
+            else:
+                print(f"The file '{file_path}' does not exist.")
+
+            # Start logging
+            self.start_logging(file_path)
+
+            # Get rid of confirmation window
+            dpg.delete_item("Confirmation Window")
+
+        def on_no(sender, app_data):
+            # Don't start logging, instead show the file directory selector again
+            # Show directory selector dialog (open to default directory)
+            dpg.configure_item(self.directory_selector_tag, show=True)
+            # Note: The selected directory is set via the _directory_selector_callback2() which in turn calls
+            # the _start_logging method once it gets the filepath to save the logged data to.
+
+            # Get rid of confirmation window
+            dpg.delete_item("Confirmation Window")
+
+        with dpg.window(
+                label="Overwrite Confirmation",
+                tag="Confirmation Window",
+                no_close=True,
+                # modal=True,   # TODO (option) this makes the window not show at all, maybe because the window just before this is modal and you can only have one modal window at a time or something?  Idk...
+                width=window_width,
+                height=window_height,
+                pos=(x_position, y_position)  # Center the window
+        ):
+            dpg.add_text(f"The file '{os.path.basename(file_path)}' already exists. Do you want to overwrite it?",
+                         wrap=window_width - 20)  # Wrap text with some padding
+            with dpg.group(horizontal=True):
+                dpg.add_button(label="Yes", width=75, user_data=file_path, callback=on_yes)
+                dpg.add_button(label="No", width=75, user_data=file_path, callback=on_no)
+
+    def _directory_selector_callback2(self, sender, app_data):
+        """
+        This is called whenever clicks the "OK" button in the file selector dialog window
+        (when the user wishes to specify the default save location for logged data)
+
+        :param sender: the tag of the UI element (the file selection dialog window)
+        :param app_data: (dictionary) -- with lots of stuff in it, just examine it for yourself
+        :type app_data: dict
+        :return: None
+
+        Note: There is also a dpg.get_file_dialog_info function that might be interesting to look into
+        """
+        # Unpack/alias values from user_data and app_data
+        # The selected directory is the full filepath and filename with spaces (but no file extension yet)
+        selected_filename_and_path = app_data['file_path_name']
+
+        # Extract the directory path from the given file path
+        directory_path = os.path.dirname(selected_filename_and_path)
+
+        # Check if the directory exists
+        if not os.path.exists(directory_path):
+            # If it doesn't exist, create it
+            os.makedirs(directory_path)
+
+        # If the file already exists, display warning to user and ask if they want to overwrite it
+        if os.path.isfile(selected_filename_and_path + ".csv"):
+            print("File already exists, asking user if they want to overwrite it")
+            self._show_confirmation_window(selected_filename_and_path)
+            # (In this case the user will click either yes or no on the confirmation window and if they click yes we will then call self.start_logging in another callback)
+        else:
+            self.start_logging(selected_filename_and_path)
+

@@ -229,8 +229,7 @@ def create_settings_pop_window(config_handler: IConfigHandler, settings_window_t
         default_save_directory_text_tag = dpg.add_text("Default Save Directory:")
         # Tooltip
         with dpg.tooltip(parent=default_save_directory_text_tag):
-            dpg.add_text("This specifies the default directory where video loggings and exported data will"
-                         "be saved to.")
+            dpg.add_text("This specifies the default directory where and exported data will be saved to.")
 
         with dpg.group(horizontal=True):
             dpg.add_text("Current Directory: ")
