@@ -72,7 +72,9 @@ class LiveWindow(IWindow):
 
     # Called whenever switching away from this screen to another one
     def hide(self):
-        # TODO more cleanup tasks when leaving this screen? Stop things etc.? Stop logging? etc.?
+        # Do window cleanup tasks here
+        if self.logging_in_progress:
+            self.stop_logging()  # Ensures file is saved (among other things)
         self.logging_in_progress = False
         # Call super class's hide function
         super(LiveWindow, self).hide()
@@ -101,17 +103,20 @@ class LiveWindow(IWindow):
 
         # Else if logging already... stop logging
         else:
-            # Set flag indicating we are not logging
-            self.logging_in_progress = False
-            # Reset selected path
-            _user_selected_filepath = None
-            # Save file
-            self.ADC_data_writer.save_file()
-            # Change the text on the logging button to start logging
-            dpg.configure_item(self.logging_button_tag, label="Start Logging")
-            dpg.set_value(self.logging_status_label_tag, "Status: Not logging")
-            # Clear the ADC data writer object since we are done with it and will want to create a new one if we want to start logging again
-            self.ADC_data_writer = None
+            self.stop_logging()
+
+    def stop_logging(self):
+        # Set flag indicating we are not logging
+        self.logging_in_progress = False
+        # Reset selected path
+        _user_selected_filepath = None
+        # Save file
+        self.ADC_data_writer.save_file()
+        # Change the text on the logging button to start logging
+        dpg.configure_item(self.logging_button_tag, label="Start Logging")
+        dpg.set_value(self.logging_status_label_tag, "Status: Not logging")
+        # Clear the ADC data writer object since we are done with it and will want to create a new one if we want to start logging again
+        self.ADC_data_writer = None
 
     def start_logging(self, filepath):
         # Create new data logger object
