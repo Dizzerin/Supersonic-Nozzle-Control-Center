@@ -151,7 +151,6 @@ def _show_error_window(exception: Exception):
             logging.error("--------------------------------------")
             logging.error(f"Fatal Error ({datetime.now()})")
             logging.error(exc_str)
-            logging.error("--------------------------------------")
 
         # Exit program
         teardown_GUI()
