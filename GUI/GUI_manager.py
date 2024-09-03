@@ -1,3 +1,8 @@
+import sys
+import traceback
+from datetime import datetime
+import logging
+
 import dearpygui.dearpygui as dpg
 from Software_Interfaces.window_interface import IWindow
 from Hardware_Interfaces.camera_data_provider_interface import ICameraDataProvider
@@ -7,7 +12,7 @@ from Software_Interfaces.config_handler_interface import IConfigHandler
 from GUI import initialization_window, welcome_window, live_window, about_window
 
 # Global variables (only used for the GUI)
-# TODO maybe later make these not globals (create these windows in init function, return them, and pass them into the
+# TODO (optional) maybe later make these not globals (create these windows in init function, return them, and pass them into the
 #   constructor of any other windows that need to use these (i.e. next_window)
 #   this would also make it so the create functions wouldn't be needed and could be done inside the concrete class's init
 INITIALIZATION_WINDOW = None
@@ -15,7 +20,18 @@ LIVE_WINDOW = None
 WELCOME_WINDOW = None
 CURRENT_WINDOW = None
 ABOUT_WINDOW = None
+# Global variable to store the last exception
+last_exception = None
 
+# TODO (optional) Make this log file location and name configurable
+log_file = "Supersonic Nozzle Control Center Error Log.txt"
+
+logging.basicConfig(
+    filename=log_file,
+    level=logging.ERROR,
+    format='%(message)s',
+    filemode='a'  # Append to the file
+)
 
 def init_GUI(camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCDataProvider,
              ADC_data_writer: IADCDataWriter, config_handler: IConfigHandler):
@@ -62,7 +78,8 @@ def run_GUI():
             present_window.update()  # Note: this function could change the current window global
         # Catch all errors, show them before exiting
         except Exception as ex:
-            print(f"ERROR! Exception occurred: {ex.message}")
+            global last_exception
+            last_exception = sys.exc_info()  # Store the exception
             change_window(WELCOME_WINDOW)
             _show_error_window(ex)
 
@@ -116,10 +133,33 @@ def _show_error_window(exception: Exception):
     x_position = (viewport_width - window_width) // 2
     y_position = (viewport_height - window_height) // 2
 
-    def on_exit(sender, app_data):
+    def _on_exit(sender, app_data, user_data):
         # Get rid of confirmation window
         dpg.delete_item("Error Window")
+
+        # Log exception/fatal error info
+        global last_exception
+        if last_exception:
+            exc_type, exc_value, exc_traceback = last_exception
+            exc_str = ''.join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+            # Print exception and traceback to console
+            print("--------------------------------------")
+            print(f"Fatal Error ({datetime.now()})")
+            print(exc_str)
+            print("--------------------------------------")
+            # Print exception and traceback to log file
+            logging.error("--------------------------------------")
+            logging.error(f"Fatal Error ({datetime.now()})")
+            logging.error(exc_str)
+            logging.error("--------------------------------------")
+
+        # Exit program
         teardown_GUI()
+
+        # Attempt to re-raise the exception
+        # Note: This doesn't actually seem to work, probably because of multi-threading stuff...
+        # Note, user_data is the exception - basically same as last_exception
+        raise user_data
 
     with dpg.window(
             label="Error!",
@@ -128,6 +168,12 @@ def _show_error_window(exception: Exception):
             autosize=True,
             pos=(x_position, y_position)  # Center the window (this won't be exact because of the auto size)
     ):
-        dpg.add_text(f"A fatal error has occurred!  Message: {exception.message}",
+        dpg.add_text("A fatal error has occurred!")
+        dpg.add_text(f"Error Type: {type(exception).__name__}")
+        dpg.add_text(f"Exception info: {str(exception)}",
                      wrap=window_width - 20)  # Wrap text with some padding
-        dpg.add_button(label="Exit", width=75, callback=on_exit)
+        dpg.add_text(f"For more information, see log file: \"{log_file}\"",
+                     wrap=window_width - 20)  # Wrap text with some padding
+
+        # Exit button
+        dpg.add_button(label="Exit", width=75, user_data=exception, callback=_on_exit)

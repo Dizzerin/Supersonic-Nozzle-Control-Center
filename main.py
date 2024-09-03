@@ -18,7 +18,7 @@ if __name__ == '__main__':
     # Initialize GUI
     GUI_manager.init_GUI(camera_data_provider=camera_data_provider, ADC_data_provider=ADC_data_provider,
                          ADC_data_writer=ADC_data_writer, config_handler=config_handler)
-    # Display Welcome Window
+    # Display Main Window
     GUI_manager.run_GUI()
     # Perform teardown actions after user closing the GUI
     GUI_manager.teardown_GUI()
