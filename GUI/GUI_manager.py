@@ -58,7 +58,13 @@ def run_GUI():
         present_window = CURRENT_WINDOW
 
         # Call the present window's update function
-        present_window.update()  # Note: this function could change the current window global
+        try:
+            present_window.update()  # Note: this function could change the current window global
+        # Catch all errors, show them before exiting
+        except Exception as ex:
+            print(f"ERROR! Exception occurred: {ex.message}")
+            change_window(WELCOME_WINDOW)
+            _show_error_window(ex)
 
         # When switching windows call the new window's update function
         if CURRENT_WINDOW is not present_window:
@@ -95,3 +101,33 @@ def change_window(to_window: IWindow):
         CURRENT_WINDOW.hide()
         # Update current window global
         CURRENT_WINDOW = to_window
+
+
+def _show_error_window(exception: Exception):
+    # Determine viewport size
+    viewport_width = dpg.get_viewport_client_width()
+    viewport_height = dpg.get_viewport_client_height()
+
+    # Window size (Note: This isn't fully used)
+    window_width = 300
+    window_height = 100
+
+    # Calculate center position
+    x_position = (viewport_width - window_width) // 2
+    y_position = (viewport_height - window_height) // 2
+
+    def on_exit(sender, app_data):
+        # Get rid of confirmation window
+        dpg.delete_item("Error Window")
+        teardown_GUI()
+
+    with dpg.window(
+            label="Error!",
+            tag="Error Window",
+            no_close=True,
+            autosize=True,
+            pos=(x_position, y_position)  # Center the window (this won't be exact because of the auto size)
+    ):
+        dpg.add_text(f"A fatal error has occurred!  Message: {exception.message}",
+                     wrap=window_width - 20)  # Wrap text with some padding
+        dpg.add_button(label="Exit", width=75, callback=on_exit)

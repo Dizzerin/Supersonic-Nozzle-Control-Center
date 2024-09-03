@@ -1,4 +1,5 @@
 from Hardware_Interfaces.camera_data_provider_interface import ICameraDataProvider
+from Hardware_Interfaces.camera_data_provider_interface import CameraError
 import dearpygui.dearpygui as dpg
 from typing import List
 import numpy as np
@@ -92,12 +93,13 @@ class PCBCamera(ICameraDataProvider):
         # if frame is read correctly ret is True
         if not successful_capture:
             print("Can't receive frame (stream end?). Exiting ...")
+            raise CameraError("Failed to get data from camera, it may have disconnected.")
 
-        # convert to float 32 type (with RGB values ranging from 0-255) - Because this is the only format dearpygui will take
+        # Convert to float 32 type (with RGB values ranging from 0-255) - Because this is the only format dearpygui will take
         frame = np.float32(frame)
         frame /= 255.
 
-        # convert to RGBA
+        # Convert to RGBA
         rgba_frame = cv.cvtColor(frame, cv.COLOR_BGR2RGBA)
 
         return rgba_frame

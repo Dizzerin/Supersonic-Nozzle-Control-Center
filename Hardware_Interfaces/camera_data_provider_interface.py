@@ -1,6 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import List
 
+class CameraError(Exception):
+    """Custom exception for camera-related errors."""
+
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
 
 class ICameraDataProvider(ABC):
     def __init__(self, width, height):

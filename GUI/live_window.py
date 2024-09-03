@@ -429,7 +429,7 @@ class LiveWindow(IWindow):
                 label="Overwrite Confirmation",
                 tag="Confirmation Window",
                 no_close=True,
-                # modal=True,   # TODO (option) this makes the window not show at all, maybe because the window just before this is modal and you can only have one modal window at a time or something?  Idk...
+                # modal=True,   # TODO (optional) this makes the window not show at all, maybe because the window just before this is modal and you can only have one modal window at a time or something?  Idk...
                 width=window_width,
                 height=window_height,
                 pos=(x_position, y_position)  # Center the window
