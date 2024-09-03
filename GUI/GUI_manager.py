@@ -33,6 +33,64 @@ logging.basicConfig(
     filemode='a'  # Append to the file
 )
 
+
+def display_pre_init_error_GUI(exception: Exception):
+    # Initialization for DPG
+    dpg.create_context()
+    dpg.create_viewport(title="Supersonic Nozzle Control Center", width=1920, height=1080)
+    dpg.set_viewport_vsync(True)  # Match display's refresh rate
+    dpg.setup_dearpygui()
+    dpg.show_viewport()
+    dpg.maximize_viewport()
+
+    # Get viewport width and height
+    viewport_width = dpg.get_viewport_client_width()
+    viewport_height = dpg.get_viewport_client_height()
+
+    # Don't show title bar
+    dpg.set_viewport_decorated(False)
+    dpg.maximize_viewport()
+
+    # Local vars
+    # Note: These are only used for the button on this screen
+    # Todo maybe implement some of this as a style and make the text larger and apply the style to these buttons instead
+    button_y_start = viewport_height / 2 + 60
+    button_width = 150
+    button_height = 35
+    button_y_spacing = 60  # Number of vertical pixels between top of one button to top of next only for Welcome Window buttons
+
+    # Create textures/images (which will later be added to the window)
+    # width1, height1, channels1, data1 = dpg.load_image(r"Image_Resources/Logo2.png")
+    # width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Red_Room_Red_Text.png")
+    # width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Red_Room_Blue_Text.png")
+    # width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Blue_Room_Blue_Text.png")
+    # width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Blue_Room_Blue_Text_Lots_Of_Roof.png")
+    # width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Red_Room_Blue_Text_Lots_Of_Roof.png")
+    width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Red_Room_Red_Text_Lots_Of_Roof.png")
+    with dpg.texture_registry():
+        # dpg.add_static_texture(width=width1, height=height1, default_value=data1, tag="title_image")
+        dpg.add_static_texture(width=width2, height=height2, default_value=data2, tag="background_image")
+
+    # Build main welcome window
+    with dpg.window(tag="pre-init-error-window", show=True):
+        # Add background image
+        dpg.add_image("background_image", pos=[0, 0])
+
+        # dpg.add_text("ERROR!\n"
+        #              "There has been an error during initialization that\n"
+        #              "is preventing the program from continuing!",
+        #              pos=[viewport_width//2-150, viewport_height//2],
+        #              wrap=viewport_width-200)
+
+        dpg.add_button(label="Exit", width=button_width, height=button_height,
+                       pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 3 * button_y_spacing],
+                       callback=dpg.stop_dearpygui)
+
+    _show_error_window(exception)
+
+    dpg.start_dearpygui()
+
+
 def init_GUI(camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCDataProvider,
              ADC_data_writer: IADCDataWriter, config_handler: IConfigHandler):
     global INITIALIZATION_WINDOW, LIVE_WINDOW, WELCOME_WINDOW, CURRENT_WINDOW, ABOUT_WINDOW

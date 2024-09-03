@@ -1,3 +1,5 @@
+import os.path
+
 from Software_Interfaces.config_handler_interface import IConfigHandler
 from Custom_Types.custom_types import TemperatureSensorConfigData, PressureSensorConfigData, ValidADCInputs, ConfigSettings, ValidSensorTypes
 import configparser
@@ -61,6 +63,10 @@ class ConfigHandler(IConfigHandler):
         (DO NOT USE the fancy my_section = config["Section"] and following section accessing and setting 
         methods as these do not raise exceptions!) 
         """
+
+        # Verify config file exists
+        if not os.path.isfile(self._config_filepath):
+            raise Exception(f"Config file \"{self._config_filepath}\" could not be found.")
 
         # Try to read config file (could throw exception)
         # Open and read the file

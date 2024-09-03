@@ -10,10 +10,13 @@ if __name__ == '__main__':
     config_file_path = path.join(path.dirname(__file__), 'config.cfg')
 
     # Instantiate data providers
-    camera_data_provider = PCBCamera(1024, 768) # TODO (Maybe) get these values from the config file (also maybe make it update live whenever config file settings are changed?  In reality, we probably shouldn't have this configurable...)
-    ADC_data_provider = Ue9LabJackADC()
-    ADC_data_writer = ADCDataFileWriter
-    config_handler = ConfigHandler(config_file_path)
+    try:
+        camera_data_provider = PCBCamera(1024, 768) # TODO (Maybe) get these values from the config file (also maybe make it update live whenever config file settings are changed?  In reality, we probably shouldn't have this configurable...)
+        ADC_data_provider = Ue9LabJackADC()
+        ADC_data_writer = ADCDataFileWriter
+        config_handler = ConfigHandler(config_file_path)
+    except Exception as e:
+        GUI_manager.display_pre_init_error_GUI(e)
 
     # Initialize GUI
     GUI_manager.init_GUI(camera_data_provider=camera_data_provider, ADC_data_provider=ADC_data_provider,
