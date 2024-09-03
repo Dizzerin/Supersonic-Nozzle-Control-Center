@@ -21,7 +21,11 @@ class ADCDataFileWriter(IADCDataWriter):
         #  logging is started we can't start another one after the first one is stopped -- also we need the file name
         #  before we even get it I think... idk
         #  also we need to timestamp these files etc. maybe?
-        self.output_file = open(self.file + '.csv', mode='w', newline='')
+        # Add .csv extension if its not there
+        if not self.file.endswith('.csv'):
+            self.file += '.csv'
+        # Create/open output file
+        self.output_file = open(self.file, mode='w', newline='')
         # Create csv file writer object
         self.file_writer = csv.writer(self.output_file, dialect='excel', delimiter=',', quotechar='"',
                                       quoting=csv.QUOTE_MINIMAL)

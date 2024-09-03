@@ -52,7 +52,9 @@ class LiveWindow(IWindow):
         self.brightness_slider_tag = "brightness_slider_tag"
         self.reset_brightness_tag = "reset_brightness"
         self.logging_button_tag = "logging_button"
+        self.logging_status_label_tag = "logging_status_label_tag"
         self.calibrate_button_tag = "calibrate_button"
+        self.calibration_status_label_tag = "calibration_status_label"
         self.time_text_box_tag = "time_text_box_tag"
         self.directory_selector_tag = "directory_selector_tag"
         self.dir_location_text_tag = "dir_location_text_tag"
@@ -92,6 +94,8 @@ class LiveWindow(IWindow):
         if not self.logging_in_progress:
             # Show directory selector dialog (open to default directory)
             dpg.configure_item(self.directory_selector_tag, show=True)
+            # Update default filename with current time
+            dpg.configure_item(self.directory_selector_tag, default_filename="Recorded Data {}".format(datetime.now().strftime("%Y-%m-%d_%H-%M-%S")))  # Suggest default filename with year month day hour minute second
             # Note: The selected directory is set via the _directory_selector_callback2() which in turn calls
             # the _start_logging method once it gets the filepath to save the logged data to.
 
@@ -105,6 +109,7 @@ class LiveWindow(IWindow):
             self.ADC_data_writer.save_file()
             # Change the text on the logging button to start logging
             dpg.configure_item(self.logging_button_tag, label="Start Logging")
+            dpg.set_value(self.logging_status_label_tag, "Status: Not logging")
             # Clear the ADC data writer object since we are done with it and will want to create a new one if we want to start logging again
             self.ADC_data_writer = None
 
@@ -119,6 +124,7 @@ class LiveWindow(IWindow):
         self.logging_in_progress = True
         # Change the text on the logging button to stop logging
         dpg.configure_item(self.logging_button_tag, label="Stop Logging")
+        dpg.set_value(self.logging_status_label_tag, "Status: Logging")
 
     def _update_video(self):
         raw_data = self.cam.get_next_frame()
@@ -241,21 +247,35 @@ class LiveWindow(IWindow):
                                            width=slider_and_button_width,
                                            user_data=self.brightness_slider_tag,
                                            callback=self.cam.reset_brightness_callback)
+
                         # Logging and Calibration Buttons
-                        button_y = viewport_height // 2 + viewport_height // 4 - 30
-                        button_x_start = viewport_width // 2 - viewport_width // 4 - 100
                         button_width = 150
                         button_height = 35
-                        button_x_spacing = 300
                         with dpg.group(horizontal=True):
-                            # TODO Set callback
-                            dpg.add_button(label="Calibrate Sensors", width=button_width, height=button_height,
-                                           pos=[button_x_start + button_x_spacing * 0, button_y],
-                                           tag=self.calibrate_button_tag)
-                            dpg.add_button(label="Start Logging", width=button_width, height=button_height,
-                                           pos=[button_x_start + button_x_spacing * 1, button_y],
-                                           tag=self.logging_button_tag,
-                                           callback=self._logging_button_callback)
+                            dpg.add_spacer(width=100)
+                            # Left column (calibration)
+                            with dpg.group(horizontal=False):
+                                dpg.add_text("Calibration")  # Header
+                                dpg.add_spacer(height=20)
+                                dpg.add_text("Status: Uncalibrated", tag=self.calibration_status_label_tag) # TODO update this
+                                dpg.add_spacer(height=10)
+                                dpg.add_text("Atmospheric Pressure (PSI):")
+                                dpg.add_input_float(tag="atmospheric_pressure_input", width=button_width, step=0.01,
+                                                    min_value=0.0, max_value=1000.0)
+                                # # TODO Set callback
+                                dpg.add_button(label="Calibrate Sensors", width=button_width, height=button_height,
+                                               tag=self.calibrate_button_tag)
+                                                # callback = self._calibration_button_callback)
+                            dpg.add_spacer(width=100)
+                            # Right column (Logging)
+                            with dpg.group(horizontal=False):
+                                dpg.add_text("Logging")  # Header
+                                dpg.add_spacer(height=20)
+                                dpg.add_text("Status: Not logging", tag=self.logging_status_label_tag) # TODO update this
+                                dpg.add_spacer(height=10)
+                                dpg.add_button(label="Start Logging", width=button_width, height=button_height,
+                                               tag=self.logging_button_tag,
+                                               callback=self._logging_button_callback)
 
                 # Right-hand side group
                 # with dpg.group(horizontal=True, pos=[viewport_width // 2 + 80, 60]) as right_group:
@@ -467,7 +487,7 @@ class LiveWindow(IWindow):
         # If the file already exists, display warning to user and ask if they want to overwrite it
         if os.path.isfile(selected_filename_and_path + ".csv"):
             print("File already exists, asking user if they want to overwrite it")
-            self._show_confirmation_window(selected_filename_and_path)
+            self._show_confirmation_window(selected_filename_and_path + ".csv")
             # (In this case the user will click either yes or no on the confirmation window and if they click yes we will then call self.start_logging in another callback)
         else:
             self.start_logging(selected_filename_and_path)
