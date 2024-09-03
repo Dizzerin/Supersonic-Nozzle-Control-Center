@@ -86,6 +86,8 @@ def display_pre_init_error_GUI(exception: Exception):
                        pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 3 * button_y_spacing],
                        callback=dpg.stop_dearpygui)
 
+    global last_exception
+    last_exception = sys.exc_info()  # Store the exception
     _show_error_window(exception)
 
     dpg.start_dearpygui()
@@ -179,6 +181,21 @@ def change_window(to_window: IWindow):
 
 
 def _show_error_window(exception: Exception):
+    # Log exception/fatal error info
+    global last_exception
+    if last_exception:
+        exc_type, exc_value, exc_traceback = last_exception
+        exc_str = ''.join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+        # Print exception and traceback to console
+        print("--------------------------------------")
+        print(f"Fatal Error ({datetime.now()})")
+        print(exc_str)
+        print("--------------------------------------")
+        # Print exception and traceback to log file
+        logging.error("--------------------------------------")
+        logging.error(f"Fatal Error ({datetime.now()})")
+        logging.error(exc_str)
+
     # Determine viewport size
     viewport_width = dpg.get_viewport_client_width()
     viewport_height = dpg.get_viewport_client_height()
@@ -194,21 +211,6 @@ def _show_error_window(exception: Exception):
     def _on_exit(sender, app_data, user_data):
         # Get rid of confirmation window
         dpg.delete_item("Error Window")
-
-        # Log exception/fatal error info
-        global last_exception
-        if last_exception:
-            exc_type, exc_value, exc_traceback = last_exception
-            exc_str = ''.join(traceback.format_exception(exc_type, exc_value, exc_traceback))
-            # Print exception and traceback to console
-            print("--------------------------------------")
-            print(f"Fatal Error ({datetime.now()})")
-            print(exc_str)
-            print("--------------------------------------")
-            # Print exception and traceback to log file
-            logging.error("--------------------------------------")
-            logging.error(f"Fatal Error ({datetime.now()})")
-            logging.error(exc_str)
 
         # Exit program
         teardown_GUI()
