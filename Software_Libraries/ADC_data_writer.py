@@ -1,6 +1,5 @@
 from Hardware_Interfaces.ADC_data_writer_interface import IADCDataWriter
 from Custom_Types.custom_types import SensorData, SensorDataTimed
-from datetime import datetime, timedelta  # TODO remove the last thing here if it remains unused
 import csv
 
 

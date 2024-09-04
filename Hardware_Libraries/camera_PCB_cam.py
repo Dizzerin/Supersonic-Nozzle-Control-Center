@@ -20,7 +20,7 @@ class PCBCamera(ICameraDataProvider):
         self.height = height        # Desired height
         self.actual_width = None    # Actual width that could be set
         self.actual_height = None   # Actual height that could be set
-        # TODO (Maybe) have default brightness, exposure and focus values?  Store the current settings/values heres?  Get the defaults from config file?
+        # TODO (optional) have default brightness, exposure and focus values?  Store the current settings/values heres?  Get the defaults from config file?
 
         # Initialize PCB Camera Capture
         self.capture = None
@@ -39,7 +39,7 @@ class PCBCamera(ICameraDataProvider):
         #   i.e. there can be emtpy indexes between valid cameras
         #   This method may seem clunky, but this is the best way right now that is os
         #   independent that I could find online
-        # TODO (Maybe) THIS ROUTINE TAKES A LONG TIME =( -- See if there's any way to make it faster
+        # TODO (optional) THIS ROUTINE TAKES A LONG TIME =( -- See if there's any way to make it faster
         index = 0
         arr = []
         i = 10
@@ -73,7 +73,7 @@ class PCBCamera(ICameraDataProvider):
         self.actual_height = self.capture.get(cv.CAP_PROP_FRAME_HEIGHT)
         if not (self.actual_width == self.width and self.actual_height == self.height):
             # Resolution was not set
-            # TODO handle this differently
+            # TODO (optional) handle this differently
             print("Requested resolution could not be set.")
             print("Set resolution to: {} x {}".format(self.actual_width, self.actual_height))
 

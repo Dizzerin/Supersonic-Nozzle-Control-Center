@@ -8,8 +8,7 @@ It simply returns a static image
 
 This class is used for testing purposes
 """
-# TODO actually write/complete this test class
-# TODO make it do the above, perhaps later also return video?
+# TODO (optional) actually write/complete this test class - make it do the above, perhaps later also return video?
 
 
 class TestCamera(ICameraDataProvider):

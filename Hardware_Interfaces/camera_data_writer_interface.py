@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 class ICameraDataWriter(ABC):
-    # TODO require input to be filehandle type
+    # TODO (optional) require input to be filehandle type
     def __init__(self, file):
         self.file = file
 

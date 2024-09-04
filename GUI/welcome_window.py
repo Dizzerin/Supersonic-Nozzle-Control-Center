@@ -15,7 +15,7 @@ class WelcomeWindow(IWindow):
         self._settings_window_tag = "settings_window"
         self._config_handler = config_handler
 
-        # TODO create rounded transparent button style and apply to buttons on this screen
+        # TODO (optional) create rounded transparent button style and apply to buttons on this screen
 
     def is_created(self) -> bool:
         return self.is_created
@@ -36,7 +36,7 @@ class WelcomeWindow(IWindow):
 
         # Local vars
         # Note: These are only used for the button on this screen
-        # Todo maybe implement some of this as a style and make the text larger and apply the style to these buttons instead
+        # Todo (optional) maybe implement some of this as a style and make the text larger and apply the style to these buttons instead
         button_y_start = viewport_height / 2 + 60
         button_width = 150
         button_height = 35

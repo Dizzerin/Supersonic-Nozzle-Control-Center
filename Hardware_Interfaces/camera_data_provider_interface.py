@@ -40,7 +40,6 @@ class ICameraDataProvider(ABC):
     def end_capture(self):
         pass
 
-    # TODO define return type
     @abstractmethod
     def get_next_frame(self):
         pass

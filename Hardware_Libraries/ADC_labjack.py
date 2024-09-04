@@ -17,9 +17,7 @@ class Ue9LabJackADC(IADCDataProvider):
         self.device = None
 
         # Configurable parameters
-        self.acquisition_start_time = None  # Set when data acquisition begins (roughly when the user first enters the live view mode)
-        # TODO decide how to make the sampling rate configurable and consistent?
-        # TODO make it so below is configurable and read from config file or something
+        # TODO (optional) make it so below is configurable and read from config file or something
         self.input_map = {  # Maps the inputs to the inputs on the ADC
             "t0": 0,
             "p0": 1,
@@ -93,9 +91,6 @@ class Ue9LabJackADC(IADCDataProvider):
 
         # Update calibration status var
         self.is_calibrated = True
-
-    def set_acquisition_start_time(self):
-        self.acquisition_start_time = datetime.now()
 
     def _get_raw_readings(self):
         # (V in documentation, units: V, order: t0, p0, p1, p2 p3, p4)

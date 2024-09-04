@@ -5,7 +5,7 @@ import configparser
 from typing import List
 
 # TODO implement use of this!!! Also maybe make everything more dynamic based off the information this returns
-#  i.e. the number of sensors etc.
+#  i.e. the number of sensors etc. -- OR JUST REMOVE THE CONFIG AND SETTINGS FEATURE
 
 
 class INIConfigHandler(IConfigHandler):

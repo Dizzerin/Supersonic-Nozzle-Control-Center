@@ -23,7 +23,7 @@ class IWindow(ABC):
 
     @abstractmethod
     def create(self, viewport_width: int, viewport_height: int):
-        # TODO maybe make this all take place in each class's init instead
+        # TODO (optional) maybe make this all take place in each class's init instead
         #   and avoid globals
         """
         Method called to create/draw the window (place the UI elements etc.)

@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 class IADCDataWriter(ABC):
-    # TODO require input to be filehandle type
+    # TODO (optional) require input to be filehandle type
     @abstractmethod
     def __init__(self, file):
         self.file = file

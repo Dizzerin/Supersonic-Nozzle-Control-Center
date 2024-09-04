@@ -27,6 +27,7 @@ class SensorDataTimed:
     elapsed_time: float         # seconds since program start/logging start
 
 
+# TODO (optional) only store the amount of data necessary for display (so it doesn't continually increase memory consumption)
 class DataStore:
 
     def __init__(self):
@@ -57,25 +58,6 @@ class DataStore:
 
     def get_current_elapsed_time(self):
         return (datetime.now()-self.start_time).total_seconds()
-
-# TODO REMOVE
-# @dataclass
-# class SensorDataWriteRow:
-#     """
-#     Structure defining the values contained in a data row
-#     This "struct" is used to contain all the data associated with what gets written by the ADC data writer
-#     Each row has a timestamp associated with it, a temperature, and a number of pressure readings
-#     logging_elapsed_time is the time since the ADC data logging (writing to file etc.) began
-#     t is a temperature
-#     p's are pressures
-#     """
-#     logging_elapsed_time: datetime
-#     t0: float
-#     p0: float
-#     p1: float
-#     p2: float
-#     p3: float
-#     p4: float
 
 
 class ValidSensorTypes(Enum):

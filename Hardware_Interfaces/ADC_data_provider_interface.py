@@ -19,11 +19,6 @@ class IADCDataProvider(ABC):
         pass
 
     @abstractmethod
-    # TODO implement the use of this
-    def set_acquisition_start_time(self):
-        pass
-
-    @abstractmethod
     def calibrate(self, atmospheric_psi: float):
         pass
 

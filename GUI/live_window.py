@@ -26,9 +26,6 @@ class LiveWindow(IWindow):
         self.data_store = data_store
         self.last_written_data_time = 0.0
 
-        # TODO change the way this is handled? -- if changing, may also need to change the reset_plots method
-        # TODO only store the amount of data necessary for display (so it doesn't continually increase memory consumption)
-        # TODO auto rescale graph's y-axes?
         # Plot sizing and data arrays
         # Global pressures and other plot data
         self.axis_duration = 10.0    # x axis duration on plots in seconds
@@ -146,13 +143,14 @@ class LiveWindow(IWindow):
 
 
     def _update_plot(self, series_tag, x_axis_tag, text_box_tag, y_data, x_data):
+        # TODO (optional) auto rescale graph's y-axes?
 
         # Update axis data
         dpg.set_value(series_tag, [x_data, y_data])
 
-        # TODO see if we need this
-        if x_data:
-            dpg.set_axis_limits(x_axis_tag, x_data[-1]-self.axis_duration, x_data[-1])
+        # Fix x-axis to last axis_duration seconds (removes axis gitter)
+        current = self.data_store.get_current_elapsed_time()
+        dpg.set_axis_limits(x_axis_tag, current-self.axis_duration, current)
 
         # Update text box displaying current value
         current_label = dpg.get_value(text_box_tag)  # Capture the current text string (something like: "P0: -00.000 (psi)")
@@ -273,7 +271,7 @@ class LiveWindow(IWindow):
                             with dpg.group(horizontal=False):
                                 dpg.add_text("Calibration")  # Header
                                 dpg.add_spacer(height=20)
-                                dpg.add_text("Status: Uncalibrated", tag=self.calibration_status_label_tag) # TODO update this
+                                dpg.add_text("Status: Uncalibrated", tag=self.calibration_status_label_tag)
                                 dpg.add_spacer(height=10)
                                 dpg.add_text("Atmospheric Pressure (PSI):")
                                 dpg.add_input_float(tag=self.pressure_input_tag, width=button_width, step=0.01,
@@ -286,7 +284,7 @@ class LiveWindow(IWindow):
                             with dpg.group(horizontal=False):
                                 dpg.add_text("Logging")  # Header
                                 dpg.add_spacer(height=20)
-                                dpg.add_text("Status: Not logging", tag=self.logging_status_label_tag) # TODO update this
+                                dpg.add_text("Status: Not logging", tag=self.logging_status_label_tag)
                                 dpg.add_spacer(height=10)
                                 dpg.add_button(label="Start Logging", width=button_width, height=button_height,
                                                tag=self.logging_button_tag,
@@ -354,7 +352,7 @@ class LiveWindow(IWindow):
 
                     # Make "Live Data" label/title of the plot group look nicer
                     #   Set PlotPadding to 7 and LabelPadding to 11
-                    # TODO figure out why this theme isn't applying to the plot_group
+                    # TODO (optional) figure out why this theme isn't applying to the plot_group
                     #   Or maybe just add a text label and set its properties instead of adjusting all plots in the group
                     with dpg.theme() as plot_group_container_theme:
                         with dpg.theme_component():
@@ -362,7 +360,7 @@ class LiveWindow(IWindow):
                             dpg.add_theme_style(dpg.mvPlotStyleVar_LabelPadding, 10)
                     dpg.bind_item_theme(plot_group, plot_group_container_theme)
 
-                    # TODO Apply a theme to these to make them nicer, maybe a light background and border?
+                    # TODO (optional) Apply a theme to these to make them nicer, maybe a light background and border?
                     # Now add the text boxes next to the plots with their current values
                     with dpg.group(horizontal=False) as label_group:
                         # Create text boxes for pressure plots
@@ -413,9 +411,6 @@ class LiveWindow(IWindow):
                                 default_filename="Recorded Data {}".format(datetime.now().strftime("%Y-%m-%d_%H-%M-%S")),   # Suggest default filename with year month day hour minute second
                                 show=False
                                 )
-
-        # Set ADC's data acquisition start time
-        self.ADC_data_provider.set_acquisition_start_time()
 
         # Indicate that this window has been created
         self.is_created = True

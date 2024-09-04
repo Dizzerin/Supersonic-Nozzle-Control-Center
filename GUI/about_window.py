@@ -30,7 +30,7 @@ class AboutWindow(IWindow):
 
         # Local vars
         # Note: These are only used for the button on this screen
-        # Todo maybe implement some of this as a style and make the text larger and apply the style to these buttons instead
+        # Todo (optional) maybe implement some of this as a style and make the text larger and apply the style to these buttons instead
         button_y_start = viewport_height / 2 + 60
         button_width = 150
         button_height = 35
