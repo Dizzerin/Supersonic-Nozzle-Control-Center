@@ -53,6 +53,7 @@ class LiveWindow(IWindow):
         self.reset_brightness_tag = "reset_brightness"
         self.logging_button_tag = "logging_button"
         self.logging_status_label_tag = "logging_status_label_tag"
+        self.pressure_input_tag = "atmospheric_pressure_input"
         self.calibrate_button_tag = "calibrate_button"
         self.calibration_status_label_tag = "calibration_status_label"
         self.time_text_box_tag = "time_text_box_tag"
@@ -88,12 +89,23 @@ class LiveWindow(IWindow):
     def include_title_bar(self) -> bool:
         return True
 
-    def _logging_button_callback(self, sender, data, user_data):
-        # TODO note that the calibration is not setup and the conversion stuff is probably
-        #   right but hasn't been verified.
+    def _calibration_button_callback(self, sender, data, user_data):
+        # Get atmospheric pressure (in psi) from user input box
+        p_atm = dpg.get_value(self.pressure_input_tag)
 
+        # Call calibration function
+        self.ADC_data_provider.calibrate(p_atm)
+
+        # Update calibration status text
+        dpg.set_value(self.calibration_status_label_tag, "Status: Calibrated")
+
+    def _logging_button_callback(self, sender, data, user_data):
         # If not logging...
         if not self.logging_in_progress:
+            # Check that the system is calibrated before you allow logging
+            if not self.ADC_data_provider.is_calibrated:
+                self._show_logging_error_window()
+                return
             # Show directory selector dialog (open to default directory)
             dpg.configure_item(self.directory_selector_tag, show=True)
             # Update default filename with current time
@@ -265,12 +277,11 @@ class LiveWindow(IWindow):
                                 dpg.add_text("Status: Uncalibrated", tag=self.calibration_status_label_tag) # TODO update this
                                 dpg.add_spacer(height=10)
                                 dpg.add_text("Atmospheric Pressure (PSI):")
-                                dpg.add_input_float(tag="atmospheric_pressure_input", width=button_width, step=0.01,
+                                dpg.add_input_float(tag=self.pressure_input_tag, width=button_width, step=0.01,
                                                     min_value=0.0, max_value=1000.0)
-                                # # TODO Set callback
                                 dpg.add_button(label="Calibrate Sensors", width=button_width, height=button_height,
-                                               tag=self.calibrate_button_tag)
-                                                # callback = self._calibration_button_callback)
+                                               tag=self.calibrate_button_tag,
+                                                callback = self._calibration_button_callback)
                             dpg.add_spacer(width=100)
                             # Right column (Logging)
                             with dpg.group(horizontal=False):
@@ -409,6 +420,33 @@ class LiveWindow(IWindow):
 
         # Indicate that this window has been created
         self.is_created = True
+
+    def _show_logging_error_window(self):
+        # Determine viewport size
+        viewport_width = dpg.get_viewport_client_width()
+        viewport_height = dpg.get_viewport_client_height()
+
+        # Window size
+        window_width = 250
+        window_height = 110
+
+        # Calculate center position
+        x_position = (viewport_width - window_width) // 2
+        y_position = (viewport_height - window_height) // 2
+
+        with dpg.window(
+                label="Calibrate Sensor",
+                tag="Logging Error Window",
+                no_close=True,
+                # modal=True,   # TODO (optional) this makes the window not show at all, maybe because the window just before this is modal and you can only have one modal window at a time or something?  Idk...
+                width=window_width,
+                height=window_height,
+                pos=(x_position, y_position)  # Center the window
+        ):
+            dpg.add_text("Please calibrate the system before you begin logging!", wrap=window_width-20)
+            dpg.add_spacer(height=10)
+            dpg.add_button(label="Ok", width=75, callback=lambda: dpg.delete_item("Logging Error Window"))
+
 
     def _show_confirmation_window(self, file_path):
         # Determine viewport size
