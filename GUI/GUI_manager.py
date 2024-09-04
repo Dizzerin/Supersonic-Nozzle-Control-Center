@@ -2,8 +2,11 @@ import sys
 import traceback
 from datetime import datetime
 import logging
+from threading import Thread
 
 import dearpygui.dearpygui as dpg
+
+from Custom_Types.custom_types import DataStore
 from Software_Interfaces.window_interface import IWindow
 from Hardware_Interfaces.camera_data_provider_interface import ICameraDataProvider
 from Hardware_Interfaces.ADC_data_provider_interface import IADCDataProvider
@@ -49,7 +52,6 @@ def display_pre_init_error_GUI(exception: Exception):
 
     # Don't show title bar
     dpg.set_viewport_decorated(False)
-    dpg.maximize_viewport()
 
     # Local vars
     # Note: These are only used for the button on this screen
@@ -94,7 +96,7 @@ def display_pre_init_error_GUI(exception: Exception):
 
 
 def init_GUI(camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCDataProvider,
-             ADC_data_writer: IADCDataWriter, config_handler: IConfigHandler):
+             ADC_data_writer: IADCDataWriter, config_handler: IConfigHandler, data_store: DataStore, sample_thread: Thread):
     global INITIALIZATION_WINDOW, LIVE_WINDOW, WELCOME_WINDOW, CURRENT_WINDOW, ABOUT_WINDOW
 
     # Initialization for DPG
@@ -110,8 +112,8 @@ def init_GUI(camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCD
     viewport_height = dpg.get_viewport_client_height()
 
     # Instantiate window classes
-    INITIALIZATION_WINDOW = initialization_window.InitializationWindow(camera_data_provider, ADC_data_provider)
-    LIVE_WINDOW = live_window.LiveWindow(camera_data_provider, ADC_data_provider, ADC_data_writer)
+    INITIALIZATION_WINDOW = initialization_window.InitializationWindow(camera_data_provider, ADC_data_provider, sample_thread)
+    LIVE_WINDOW = live_window.LiveWindow(camera_data_provider, ADC_data_provider, ADC_data_writer, data_store)
     WELCOME_WINDOW = welcome_window.WelcomeWindow(config_handler)
     ABOUT_WINDOW = about_window.AboutWindow()
 

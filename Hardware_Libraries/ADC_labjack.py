@@ -73,7 +73,7 @@ class Ue9LabJackADC(IADCDataProvider):
         return self.is_initialized
 
     def is_calibrated(self) -> bool:
-        # TODO check that this is true before logging data
+        # NOTE: You should check that this is true before logging data!
         return self.is_calibrated
 
     def calibrate(self, atmospheric_psi: float):

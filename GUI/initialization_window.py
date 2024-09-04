@@ -1,3 +1,5 @@
+from threading import Thread
+
 import dearpygui.dearpygui as dpg
 from Software_Interfaces.window_interface import IWindow
 from GUI import GUI_manager
@@ -6,7 +8,7 @@ from Hardware_Interfaces.ADC_data_provider_interface import IADCDataProvider
 
 
 class InitializationWindow(IWindow):
-    def __init__(self, camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCDataProvider):
+    def __init__(self, camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCDataProvider, sample_thread: Thread):
         # Call super class's init
         super(InitializationWindow, self).__init__()
 
@@ -20,6 +22,7 @@ class InitializationWindow(IWindow):
         self.camera_ready = False
         self.try_initialization = True
         self.num_update_calls = 0
+        self.sampling_thread = sample_thread
 
         # UI element tags
         self.no_ADC_warning_tag = "ADC_warning"
@@ -67,6 +70,7 @@ class InitializationWindow(IWindow):
                 dpg.configure_item(self.exit_button_tag, show=True)
             else:
                 self.ADC_ready = True
+                self.sampling_thread.start()
 
             # Try to initialize default camera
             # TODO get default camera from config/settings file

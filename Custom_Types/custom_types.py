@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
-import datetime
 from typing import List
+from datetime import datetime
 
 
 @dataclass
@@ -19,6 +19,44 @@ class SensorData:
     p3: float
     p4: float
 
+
+@dataclass
+class SensorDataTimed:
+    sensor_data: SensorData
+    absolute_time: datetime
+    elapsed_time: float         # seconds since program start/logging start
+
+
+class DataStore:
+
+    def __init__(self):
+        self.start_time = datetime.now()
+        self.data: List[SensorDataTimed] = []
+
+    def clear(self):
+        self.start_time = datetime.now()
+        self.data = []
+
+    def add_sensor_data(self, sensor_data: SensorData):
+        current_time = datetime.now()
+        self.data.append(SensorDataTimed(sensor_data, current_time, self.get_current_elapsed_time()))
+
+    def get_data_after_time(self, elapsed_time: float):
+        # return [x for x in reversed(self.data) if x.elapsed_time > elapsed_time]
+        # Iterate from end backwards
+        return_data = []
+        for x in reversed(self.data):
+            if x.elapsed_time > elapsed_time:
+                return_data.append(x)
+            else:
+                break
+        return reversed(return_data)
+
+    def get_last_x_seconds_of_data(self, seconds: float):
+        return self.get_data_after_time(self.get_current_elapsed_time()-seconds)
+
+    def get_current_elapsed_time(self):
+        return (datetime.now()-self.start_time).total_seconds()
 
 # TODO REMOVE
 # @dataclass

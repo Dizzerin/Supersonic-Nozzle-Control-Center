@@ -1,5 +1,7 @@
 import os
 import dearpygui.dearpygui as dpg
+
+from Custom_Types.custom_types import DataStore
 from Software_Interfaces.window_interface import IWindow
 from Hardware_Interfaces.ADC_data_provider_interface import IADCDataProvider
 from Hardware_Interfaces.ADC_data_writer_interface import IADCDataWriter
@@ -10,7 +12,7 @@ from GUI import GUI_manager
 
 class LiveWindow(IWindow):
     def __init__(self, camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCDataProvider,
-                 ADC_data_writer: IADCDataWriter):
+                 ADC_data_writer: IADCDataWriter, data_store: DataStore):
         # Call super class's init
         super(LiveWindow, self).__init__()
 
@@ -21,24 +23,18 @@ class LiveWindow(IWindow):
         self.ADC_data_writer = None
         self.logging_in_progress = False
 
+        self.data_store = data_store
+        self.last_written_data_time = 0.0
+
         # TODO change the way this is handled? -- if changing, may also need to change the reset_plots method
         # TODO only store the amount of data necessary for display (so it doesn't continually increase memory consumption)
         # TODO auto rescale graph's y-axes?
         # Plot sizing and data arrays
         # Global pressures and other plot data
-        self.time_data = [0]
-        self.axis_duration = 200
-        self.axis_start_time = 0
-        self.axis_end_time = self.axis_duration
+        self.axis_duration = 10.0    # x axis duration on plots in seconds
         self.num_pressure_plots = 5
         self.plot_height = 150  # pixels
         self.plot_width = 700  # pixels
-        self.t0_y_data = []
-        self.p0_y_data = []
-        self.p1_y_data = []
-        self.p2_y_data = []
-        self.p3_y_data = []
-        self.p4_y_data = []
         self.is_created = False
 
         # Other sizing vars
@@ -123,7 +119,7 @@ class LiveWindow(IWindow):
         # Reset selected path
         _user_selected_filepath = None
         # Save file
-        self.ADC_data_writer.save_file()
+        self.ADC_data_writer.close_file()
         # Change the text on the logging button to start logging
         dpg.configure_item(self.logging_button_tag, label="Start Logging")
         dpg.set_value(self.logging_status_label_tag, "Status: Not logging")
@@ -134,9 +130,10 @@ class LiveWindow(IWindow):
         # Create new data logger object
         self.ADC_data_writer = self.ADC_data_writer_class(filepath)
 
+        self.data_store.clear()
+        self.last_written_data_time = 0
+
         # Start logging
-        # Set logging start time
-        self.ADC_data_writer.set_logging_start_time()
         # Set flag indicating we are logging
         self.logging_in_progress = True
         # Change the text on the logging button to stop logging
@@ -147,59 +144,62 @@ class LiveWindow(IWindow):
         raw_data = self.cam.get_next_frame()
         dpg.set_value(self.video_texture_tag, raw_data)
 
-    def _update_plot(self, series_tag, x_axis_tag, text_box_tag, y_data):
-        # "Scroll" x-axis
-        dpg.set_axis_limits(x_axis_tag, self.axis_start_time, self.axis_end_time)
+
+    def _update_plot(self, series_tag, x_axis_tag, text_box_tag, y_data, x_data):
 
         # Update axis data
-        dpg.set_value(series_tag, [self.time_data, y_data])
+        dpg.set_value(series_tag, [x_data, y_data])
+
+        # TODO see if we need this
+        if x_data:
+            dpg.set_axis_limits(x_axis_tag, x_data[-1]-self.axis_duration, x_data[-1])
 
         # Update text box displaying current value
-        current_label = dpg.get_value(
-            text_box_tag)  # Capture the current text string (something like: "P0: -00.000 (psi)")
+        current_label = dpg.get_value(text_box_tag)  # Capture the current text string (something like: "P0: -00.000 (psi)")
         numeric_start_index = current_label.find(": ") + 1
         numeric_end_index = current_label.rfind(" (")
         # Update only the numeric portion of the string (with the latest measurement value) and retain the rest of the string
-        dpg.set_value(text_box_tag,
-                      current_label[:numeric_start_index + 1] + "{:#8.3f}".format(y_data[-1]) + current_label[
-                                                                                                numeric_end_index:])
+        try:
+            value_str = "{:#8.3f}".format(y_data[-1])
+        except IndexError:
+            value_str = "N/A"
+
+        dpg.set_value(text_box_tag, current_label[:numeric_start_index + 1] + value_str + current_label[numeric_end_index:])
 
     def _update_plots(self):
         # Update time and pressure and temperature values
-        self.time_data.append(self.time_data[-1] + 1)
-        if len(self.time_data) >= self.axis_end_time:
-            self.axis_start_time += 1
-            self.axis_end_time += 1
-        dpg.set_value(self.time_text_box_tag, "Time: {:#6.3f} (s)".format(self.time_data[-1]))
+
+        dpg.set_value(self.time_text_box_tag, "Time: {:#6.3f} (s)".format(self.data_store.get_current_elapsed_time()))
 
         # Read new data from ADC
-        ADC_data = self.ADC_data_provider.get_next_data_row()
-        self.t0_y_data.append(ADC_data.t0)
-        self.p0_y_data.append(ADC_data.p0)
-        self.p1_y_data.append(ADC_data.p1)
-        self.p2_y_data.append(ADC_data.p2)
-        self.p3_y_data.append(ADC_data.p3)
-        self.p4_y_data.append(ADC_data.p4)
+        x_data = []
+        t0_y_data = []
+        p0_y_data = []
+        p1_y_data = []
+        p2_y_data = []
+        p3_y_data = []
+        p4_y_data = []
+        # for timed_data in self.data_store.data[:-self.axis_duration]:
+        for timed_data in self.data_store.get_last_x_seconds_of_data(self.axis_duration):
+            x_data.append(timed_data.elapsed_time)
+            t0_y_data.append(timed_data.sensor_data.t0)
+            p0_y_data.append(timed_data.sensor_data.p0)
+            p1_y_data.append(timed_data.sensor_data.p1)
+            p2_y_data.append(timed_data.sensor_data.p2)
+            p3_y_data.append(timed_data.sensor_data.p3)
+            p4_y_data.append(timed_data.sensor_data.p4)
 
         # Update plots
-        self._update_plot("t0_series", "t0_x_axis", "t0_text_box", self.t0_y_data)
-        self._update_plot("p0_series", "p0_x_axis", "p0_text_box", self.p0_y_data)
-        self._update_plot("p1_series", "p1_x_axis", "p1_text_box", self.p1_y_data)
-        self._update_plot("p2_series", "p2_x_axis", "p2_text_box", self.p2_y_data)
-        self._update_plot("p3_series", "p3_x_axis", "p3_text_box", self.p3_y_data)
-        self._update_plot("p4_series", "p4_x_axis", "p4_text_box", self.p4_y_data)
+        self._update_plot("t0_series", "t0_x_axis", "t0_text_box", t0_y_data, x_data)
+        self._update_plot("p0_series", "p0_x_axis", "p0_text_box", p0_y_data, x_data)
+        self._update_plot("p1_series", "p1_x_axis", "p1_text_box", p1_y_data, x_data)
+        self._update_plot("p2_series", "p2_x_axis", "p2_text_box", p2_y_data, x_data)
+        self._update_plot("p3_series", "p3_x_axis", "p3_text_box", p3_y_data, x_data)
+        self._update_plot("p4_series", "p4_x_axis", "p4_text_box", p4_y_data, x_data)
 
     def _reset_plots(self):
         # Reset plot data
-        self.time_data = [0]
-        self.axis_start_time = 0
-        self.axis_end_time = self.axis_duration
-        self.t0_y_data = []
-        self.p0_y_data = []
-        self.p1_y_data = []
-        self.p2_y_data = []
-        self.p3_y_data = []
-        self.p4_y_data = []
+        self.data_store.clear()
         self._update_plots()
 
     def update(self):
@@ -207,13 +207,12 @@ class LiveWindow(IWindow):
         self._update_plots()
 
         # Write new data row if logging is in progress
-        # TODO THIS SHOULD BE DONE DIFFERENT
-        #   Should use the same data that was placed on the graphs -- should probably also slow this down?
-        #   also want to be able to adjust the sampling rate
         if self.logging_in_progress:
-            # Write new logging line
-            last_sample_time = datetime.now()
-            self.ADC_data_writer.write_ADC_data(self.ADC_data_provider.get_next_data_row(), last_sample_time)
+            new_data = self.data_store.get_data_after_time(self.last_written_data_time)
+
+            for data in new_data:
+                self.ADC_data_writer.write_ADC_data(data)
+                self.last_written_data_time = data.elapsed_time
 
     def create(self, viewport_width: int, viewport_height: int):
         # Local vars
@@ -339,7 +338,7 @@ class LiveWindow(IWindow):
                                                       no_tick_labels=True)
                                     with dpg.plot_axis(dpg.mvYAxis, label="(psi)", tag="p{}_y_axis".format(str(i))):
                                         # Create line_series plots
-                                        dpg.add_line_series(self.time_data, [], label="Pressure {}".format(str(i)),
+                                        dpg.add_line_series([], [], label="Pressure {}".format(str(i)),
                                                             tag="p{}_series".format(str(i)))
 
                             # Create temperature plot
@@ -351,7 +350,7 @@ class LiveWindow(IWindow):
                                 dpg.add_plot_axis(dpg.mvXAxis, label="time (s)", tag="t0_x_axis")
                                 with dpg.plot_axis(dpg.mvYAxis, label="(Kelvin)", tag="t0_y_axis"):
                                     # Create line_series plots
-                                    dpg.add_line_series(self.time_data, [], label="Temperature 0", tag="t0_series")
+                                    dpg.add_line_series([], [], label="Temperature 0", tag="t0_series")
 
                     # Make "Live Data" label/title of the plot group look nicer
                     #   Set PlotPadding to 7 and LabelPadding to 11
