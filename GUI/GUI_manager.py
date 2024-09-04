@@ -44,7 +44,7 @@ def display_pre_init_error_GUI(exception: Exception):
     dpg.set_viewport_vsync(True)  # Match display's refresh rate
     dpg.setup_dearpygui()
     dpg.show_viewport()
-    dpg.maximize_viewport()
+    # dpg.maximize_viewport()
 
     # Get viewport width and height
     viewport_width = dpg.get_viewport_client_width()
@@ -105,7 +105,7 @@ def init_GUI(camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCD
     dpg.set_viewport_vsync(True)  # Match display's refresh rate
     dpg.setup_dearpygui()
     dpg.show_viewport()
-    dpg.maximize_viewport()
+    # dpg.maximize_viewport()
 
     # Get viewport width and height
     viewport_width = dpg.get_viewport_client_width()

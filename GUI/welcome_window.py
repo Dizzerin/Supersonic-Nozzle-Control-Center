@@ -32,7 +32,7 @@ class WelcomeWindow(IWindow):
     def create(self, viewport_width: int, viewport_height: int):
         # Don't show title bar
         dpg.set_viewport_decorated(self.include_title_bar())
-        dpg.maximize_viewport()
+        # dpg.maximize_viewport()
 
         # Local vars
         # Note: These are only used for the button on this screen
