@@ -123,7 +123,7 @@ class InitializationWindow(IWindow):
         #     dpg.add_static_texture(width=width, height=height, default_value=data, tag="background_image_crop")
 
         # Build the window
-        with dpg.window(tag=self.tag(), show=True):
+        with dpg.window(tag=self.tag(), show=True, no_scrollbar=True):
             # TODO Verify positioning of all objects on this window
             # Add background image
             # TODO should probably handle this image differently, see note below

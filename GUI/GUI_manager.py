@@ -40,18 +40,19 @@ logging.basicConfig(
 def display_pre_init_error_GUI(exception: Exception):
     # Initialization for DPG
     dpg.create_context()
-    dpg.create_viewport(title="Supersonic Nozzle Control Center", width=1920, height=1080)
+    dpg.create_viewport(title="Supersonic Nozzle Control Center", width=1920, height=1080, resizable=False)
     dpg.set_viewport_vsync(True)  # Match display's refresh rate
     dpg.setup_dearpygui()
     dpg.show_viewport()
     # dpg.maximize_viewport()
+    title_bar_height = 47
 
     # Get viewport width and height
     viewport_width = dpg.get_viewport_client_width()
     viewport_height = dpg.get_viewport_client_height()
 
     # Don't show title bar
-    dpg.set_viewport_decorated(False)
+    # dpg.set_viewport_decorated(False)
 
     # Local vars
     # Note: These are only used for the button on this screen
@@ -71,10 +72,10 @@ def display_pre_init_error_GUI(exception: Exception):
     width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Red_Room_Red_Text_Lots_Of_Roof.png")
     with dpg.texture_registry():
         # dpg.add_static_texture(width=width1, height=height1, default_value=data1, tag="title_image")
-        dpg.add_static_texture(width=width2, height=height2, default_value=data2, tag="background_image")
+        dpg.add_static_texture(width=width2, height=height2-title_bar_height, default_value=data2, tag="background_image")
 
     # Build main welcome window
-    with dpg.window(tag="pre-init-error-window", show=True):
+    with dpg.window(tag="pre-init-error-window", show=True, no_scrollbar=True):
         # Add background image
         dpg.add_image("background_image", pos=[0, 0])
 
@@ -101,7 +102,8 @@ def init_GUI(camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCD
 
     # Initialization for DPG
     dpg.create_context()
-    dpg.create_viewport(title="Supersonic Nozzle Control Center", width=1920, height=1080)
+    dpg.create_viewport(title="Supersonic Nozzle Control Center", width=1920, height=1080, resizable=False)
+    dpg.set_viewport_pos([0, 0])  # Ensure its in the top left of the screen
     dpg.set_viewport_vsync(True)  # Match display's refresh rate
     dpg.setup_dearpygui()
     dpg.show_viewport()

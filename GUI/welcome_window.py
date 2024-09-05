@@ -31,8 +31,9 @@ class WelcomeWindow(IWindow):
 
     def create(self, viewport_width: int, viewport_height: int):
         # Don't show title bar
-        dpg.set_viewport_decorated(self.include_title_bar())
+        # dpg.set_viewport_decorated(self.include_title_bar())
         # dpg.maximize_viewport()
+        title_bar_height = 47
 
         # Local vars
         # Note: These are only used for the button on this screen
@@ -52,13 +53,13 @@ class WelcomeWindow(IWindow):
         width2, height2, channels2, data2 = dpg.load_image(r"Image_Resources/Red_Room_Red_Text_Lots_Of_Roof.png")
         with dpg.texture_registry():
             # dpg.add_static_texture(width=width1, height=height1, default_value=data1, tag="title_image")
-            dpg.add_static_texture(width=width2, height=height2, default_value=data2, tag="background_image")
+            dpg.add_static_texture(width=width2, height=height2-title_bar_height, default_value=data2, tag="background_image")
 
         # Build settings popup/modal window
         create_settings_pop_window(self._config_handler, self._settings_window_tag, viewport_width, viewport_height)
 
         # Build main welcome window
-        with dpg.window(tag=self.tag(), show=True):
+        with dpg.window(tag=self.tag(), show=True, no_scrollbar=True):
 
             # Add background image
             dpg.add_image("background_image", pos=[0, 0])

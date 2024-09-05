@@ -35,7 +35,7 @@ class IWindow(ABC):
 
     def show(self):
         # Show/hide title bar according to window's setting
-        dpg.set_viewport_decorated(self.include_title_bar())
+        # dpg.set_viewport_decorated(self.include_title_bar())
         # dpg.maximize_viewport()
         # Show the window
         dpg.configure_item(self.tag(), show=True)

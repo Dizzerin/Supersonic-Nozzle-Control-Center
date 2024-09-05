@@ -25,7 +25,7 @@ class AboutWindow(IWindow):
 
     def create(self, viewport_width: int, viewport_height: int):
         # Don't show title bar
-        dpg.set_viewport_decorated(self.include_title_bar())
+        # dpg.set_viewport_decorated(self.include_title_bar())
         # dpg.maximize_viewport()
 
         # Local vars
@@ -37,10 +37,10 @@ class AboutWindow(IWindow):
         button_y_spacing = 60  # Number of vertical pixels between top of one button to top of next only for Welcome Window buttons
 
         # Title positioning
-        title_y_start = viewport_height / 2 - 70
+        title_y_start = viewport_height / 2 - 30
 
         # Build main welcome window
-        with dpg.window(tag=self.tag(), show=True):
+        with dpg.window(tag=self.tag(), show=True, no_scrollbar=True):
             # Add background image (this depends on this already being created and in the texture registry)
             dpg.add_image("background_image", pos=[0, 0])
 
@@ -55,7 +55,7 @@ class AboutWindow(IWindow):
 
             # Add buttons
             dpg.add_button(label="Take me back!", width=button_width, height=button_height,
-                       pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 0 * button_y_spacing],
+                       pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 1 * button_y_spacing],
                        callback=lambda: GUI_manager.change_window(GUI_manager.WELCOME_WINDOW))
 
         # Indicate that this window has been created
