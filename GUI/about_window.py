@@ -55,7 +55,7 @@ class AboutWindow(IWindow):
 
             # Add buttons
             dpg.add_button(label="Take me back!", width=button_width, height=button_height,
-                       pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 1 * button_y_spacing],
+                       pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 0 * button_y_spacing],
                        callback=lambda: GUI_manager.change_window(GUI_manager.WELCOME_WINDOW))
 
         # Indicate that this window has been created

@@ -68,17 +68,27 @@ class WelcomeWindow(IWindow):
                            pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 0 * button_y_spacing],
                            callback=lambda: GUI_manager.change_window(GUI_manager.INITIALIZATION_WINDOW))
 
-            dpg.add_button(label="Settings", width=button_width, height=button_height,
-                           pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 1 * button_y_spacing],
-                           callback=lambda: dpg.configure_item(self._settings_window_tag, show=True))
-
             dpg.add_button(label="About", tag="About", width=button_width, height=button_height,
-                           pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 2 * button_y_spacing],
+                           pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 1 * button_y_spacing],
                            callback=lambda: GUI_manager.change_window(GUI_manager.ABOUT_WINDOW))
 
             dpg.add_button(label="Exit", width=button_width, height=button_height,
-                           pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 3 * button_y_spacing],
+                           pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 2 * button_y_spacing],
                            callback=dpg.stop_dearpygui)
+
+            # TODO (Optional) Add settings feature back in
+            #   For now I have chosen to simply remove this button so it can't be accessed this way.
+            #   In theory you can still directly edit the config.cfg file, but not all of the settings in there are actually used... hence why I am removing the obvious access to modify the settings.
+            #   Reasons this was removed:
+            #       I didn't implement use of all the settings in the config file yet, for example the default save directory and the camera index settings are not used (among other things probably)
+            #       I didn't finish writing the stuff to verify the settings in the config file to make sure its valid all the time etc.
+            #       Not all of the settings in the config file are available on the settings screen I created
+            #       If we add settings back in, we should add more things to the settings (like being able to adjust the sample rate, camera focus and brightness settings, etc. for example)
+            #       I have run out of time to work on this and the settings really aren't necessary, so its easiest to just remove them or remove access to them, which I'm doing by just taking this button away.
+            #       If you want to add them back in, uncomment the code below and click the button and see what it does and what's there and then go from there to see what all else needs to be done (there are several other todo's marked optional that are related to settings the the config file stuff)
+            # dpg.add_button(label="Settings", width=button_width, height=button_height,
+            #                pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 3 * button_y_spacing],
+            #                callback=lambda: dpg.configure_item(self._settings_window_tag, show=True))
 
         # Indicate that this window has been created
         self.is_created = True
