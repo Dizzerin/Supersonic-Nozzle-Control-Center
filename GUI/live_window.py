@@ -197,12 +197,12 @@ class LiveWindow(IWindow):
             p4_y_data.append(timed_data.sensor_data.p4)
 
         # Update plots
-        self._update_plot("t0_series", "t0_x_axis", "t0_y_axis", "t0_text_box", t0_x_data, y_data)
-        self._update_plot("p0_series", "p0_x_axis", "p0_y_axis", "p0_text_box", p0_x_data, y_data)
-        self._update_plot("p1_series", "p1_x_axis", "p1_y_axis", "p1_text_box", p1_x_data, y_data)
-        self._update_plot("p2_series", "p2_x_axis", "p2_y_axis", "p2_text_box", p2_x_data, y_data)
-        self._update_plot("p3_series", "p3_x_axis", "p3_y_axis", "p3_text_box", p3_x_data, y_data)
-        self._update_plot("p4_series", "p4_x_axis", "p4_y_axis", "p4_text_box", p4_x_data, y_data)
+        self._update_plot("t0_series", "t0_x_axis", "t0_y_axis", "t0_text_box", x_data, t0_y_data)
+        self._update_plot("p0_series", "p0_x_axis", "p0_y_axis", "p0_text_box", x_data, p0_y_data)
+        self._update_plot("p1_series", "p1_x_axis", "p1_y_axis", "p1_text_box", x_data, p1_y_data)
+        self._update_plot("p2_series", "p2_x_axis", "p2_y_axis", "p2_text_box", x_data, p2_y_data)
+        self._update_plot("p3_series", "p3_x_axis", "p3_y_axis", "p3_text_box", x_data, p3_y_data)
+        self._update_plot("p4_series", "p4_x_axis", "p4_y_axis", "p4_text_box", x_data, p4_y_data)
 
     def _reset_plots(self):
         # Reset plot data
