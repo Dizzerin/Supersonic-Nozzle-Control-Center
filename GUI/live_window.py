@@ -142,15 +142,24 @@ class LiveWindow(IWindow):
         dpg.set_value(self.video_texture_tag, raw_data)
 
 
-    def _update_plot(self, series_tag, x_axis_tag, text_box_tag, y_data, x_data):
-        # TODO (optional) auto rescale graph's y-axes?
-
+    def _update_plot(self, series_tag, x_axis_tag, y_axis_tag, text_box_tag, x_data, y_data):
         # Update axis data
         dpg.set_value(series_tag, [x_data, y_data])
 
-        # Fix x-axis to last axis_duration seconds (removes axis gitter)
+        # Fix x-axis to last axis_duration seconds (removes axis jitter)
         current = self.data_store.get_current_elapsed_time()
         dpg.set_axis_limits(x_axis_tag, current-self.axis_duration, current)
+
+        # Auto-scale plot's y-axis
+        # Calculate y-axis limits with a buffer
+        if len(y_data) > 0:
+            y_min = min(y_data)
+            y_max = max(y_data)
+            buffer = (y_max - y_min) * 0.1  # Buffer is 10% of the data range
+            dpg.set_axis_limits(y_axis_tag, y_min - buffer, y_max + buffer)
+        else:
+            # Default y-axis limits if no data is available
+            dpg.set_axis_limits(y_axis_tag, 0, 1)
 
         # Update text box displaying current value
         current_label = dpg.get_value(text_box_tag)  # Capture the current text string (something like: "P0: -00.000 (psi)")
@@ -188,12 +197,12 @@ class LiveWindow(IWindow):
             p4_y_data.append(timed_data.sensor_data.p4)
 
         # Update plots
-        self._update_plot("t0_series", "t0_x_axis", "t0_text_box", t0_y_data, x_data)
-        self._update_plot("p0_series", "p0_x_axis", "p0_text_box", p0_y_data, x_data)
-        self._update_plot("p1_series", "p1_x_axis", "p1_text_box", p1_y_data, x_data)
-        self._update_plot("p2_series", "p2_x_axis", "p2_text_box", p2_y_data, x_data)
-        self._update_plot("p3_series", "p3_x_axis", "p3_text_box", p3_y_data, x_data)
-        self._update_plot("p4_series", "p4_x_axis", "p4_text_box", p4_y_data, x_data)
+        self._update_plot("t0_series", "t0_x_axis", "t0_y_axis", "t0_text_box", t0_x_data, y_data)
+        self._update_plot("p0_series", "p0_x_axis", "p0_y_axis", "p0_text_box", p0_x_data, y_data)
+        self._update_plot("p1_series", "p1_x_axis", "p1_y_axis", "p1_text_box", p1_x_data, y_data)
+        self._update_plot("p2_series", "p2_x_axis", "p2_y_axis", "p2_text_box", p2_x_data, y_data)
+        self._update_plot("p3_series", "p3_x_axis", "p3_y_axis", "p3_text_box", p3_x_data, y_data)
+        self._update_plot("p4_series", "p4_x_axis", "p4_y_axis", "p4_text_box", p4_x_data, y_data)
 
     def _reset_plots(self):
         # Reset plot data
