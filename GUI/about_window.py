@@ -37,7 +37,7 @@ class AboutWindow(IWindow):
         button_y_spacing = 60  # Number of vertical pixels between top of one button to top of next only for Welcome Window buttons
 
         # Title positioning
-        title_y_start = 100
+        title_y_start = viewport_height / 2 - 70
 
         # Build main welcome window
         with dpg.window(tag=self.tag(), show=True):
@@ -45,12 +45,17 @@ class AboutWindow(IWindow):
             dpg.add_image("background_image", pos=[0, 0])
 
             # Add title/subtitle text
-            dpg.add_text("WELCOME", pos=[int(viewport_width / 2 - 50), title_y_start])
-            dpg.add_text("Supersonic Nozzle Control Center 0.1.0", pos=[int(viewport_width / 2 - 150), title_y_start + 30])
+            dpg.add_text("ABOUT", pos=[int(viewport_width / 2 - 30), title_y_start])
+            dpg.add_text("Supersonic Nozzle Control Center v0.1.0", pos=[int(viewport_width / 2 - 150), title_y_start + 40])
+
+            # Add github link
+            dpg.add_text("To access project source code, visit:\n"
+                         "https://github.com/Dizzerin/Supersonic-Nozzle-Control-Center",
+                         pos=[int(viewport_width / 2 - 150), title_y_start + 70])
 
             # Add buttons
             dpg.add_button(label="Take me back!", width=button_width, height=button_height,
-                       pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 0 * button_y_spacing],
+                       pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 1 * button_y_spacing],
                        callback=lambda: GUI_manager.change_window(GUI_manager.WELCOME_WINDOW))
 
         # Indicate that this window has been created
