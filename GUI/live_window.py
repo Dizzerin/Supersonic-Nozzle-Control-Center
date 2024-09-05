@@ -391,7 +391,7 @@ class LiveWindow(IWindow):
                                           60 + ((self.plot_height - 5) * (self.num_pressure_plots + 1))])
 
                     # Add tooltips to temperature and pressure plots and text boxes
-                    # TODO use this from config file
+                    # TODO (optional) use this from config file
                     descriptions = {"t0_y_axis": "Temperature inside the tank (stagnation temperature)",
                                     "p0_y_axis": "Pressure inside the tank (stagnation pressure)",
                                     "p1_y_axis": "Pressure upstream of the throat",
@@ -411,6 +411,7 @@ class LiveWindow(IWindow):
                             dpg.add_text(value)
 
             # Create Directory Selector Dialog (created hidden, but is shown when the select button is pressed)
+            desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
             dpg.add_file_dialog(label="Select save directory", tag=self.directory_selector_tag,
                                 directory_selector=False,
                                 callback=self._directory_selector_callback2,
@@ -418,6 +419,7 @@ class LiveWindow(IWindow):
                                 height=self.directory_selector_window_height,
                                 modal=True,
                                 default_filename="Recorded Data {}".format(datetime.now().strftime("%Y-%m-%d_%H-%M-%S")),   # Suggest default filename with year month day hour minute second
+                                default_path=desktop_path,  # Default save directory (hardcoded)
                                 show=False
                                 )
 

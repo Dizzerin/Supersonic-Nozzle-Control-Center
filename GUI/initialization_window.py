@@ -112,7 +112,7 @@ class InitializationWindow(IWindow):
 
     def create(self, viewport_width: int, viewport_height: int):
         # Local vars
-        text_y_start = 500
+        text_y_start = 480
         button_y_start = text_y_start + 90
         button_width = 150
         button_height = 35
@@ -135,7 +135,7 @@ class InitializationWindow(IWindow):
             # Add title/subtitle text
             # dpg.add_text("Supersonic Nozzle Control Center 0.1.0", pos=[int(viewport_width / 2 - 130), title_y_start])
             dpg.add_text("Initializing...", pos=[int(viewport_width / 2 - 50), text_y_start])
-            dpg.add_loading_indicator(pos=[int(viewport_width / 2 - 20), text_y_start + 50])
+            dpg.add_loading_indicator(pos=[int(viewport_width / 2 - 20), text_y_start + 35])
 
             # ADC warning (hidden by default)
             dpg.add_text("Warning, ADC unit could not be found/initialized!  Cannot continue!",
