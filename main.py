@@ -22,7 +22,11 @@ def do_sampling(sample_period_s: float, ADC_data_provider: IADCDataProvider, dat
         data_store.add_sensor_data(ADC_data_provider.get_next_data_row())
         sample_end_time = datetime.now()
         # Sleep this thread until time to take next sample
-        time.sleep(sample_period_s-(sample_end_time-sample_start_time).total_seconds())
+        sleep_duration = sample_period_s-(sample_end_time-sample_start_time).total_seconds()
+        # Ensure we don't try sleeping for negative time (in the rare event a sample takes longer than the sample period)
+        if sleep_duration < 0:
+            sleep_duration = 0
+        time.sleep(sleep_duration)
 
         # Max sample time under 10ms it seems
         # print(f"sample time: {(sample_end_time-sample_start_time).total_seconds()}")
