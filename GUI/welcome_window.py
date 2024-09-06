@@ -33,11 +33,11 @@ class WelcomeWindow(IWindow):
         # Don't show title bar
         # dpg.set_viewport_decorated(self.include_title_bar())
         # dpg.maximize_viewport()
-        title_bar_height = 47
+        title_bar_height = 71  # Adjustment factor to account for title bar, task bar, and dear py gui/windows 11 bugs -- amount to trim background image by so no scrollbar shows
 
         # Local vars
         # Note: These are only used for the button on this screen
-        # Todo (optional) maybe implement some of this as a style and make the text larger and apply the style to these buttons instead
+        # Todo (skip) maybe implement some of this as a style and make the text larger and apply the style to these buttons instead
         button_y_start = viewport_height / 2 + 60
         button_width = 150
         button_height = 35

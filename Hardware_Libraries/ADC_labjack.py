@@ -28,8 +28,10 @@ class Ue9LabJackADC(IADCDataProvider):
         }
 
         # Computed/read values
-        self.atmospheric_psi__p_atm = 14.26  # (P_atm in documentation, units: psi, defaults to avg pressure at 800ft)
+        self.atmospheric_psi__p_atm = 14.26  # (P_atm in documentation, units: psi, defaults to avg pressure at 800ft) -- this is just a default setting but is overwritten later when user calibrates
         self.amplifier_offsets__ba = np.array([0.0, 0.0, 0.0, 0.0, 0.0])  # (ba in documentation, units: V)
+
+        self.temp_sensor_amplifier_gain__m = 0.00494  # (m in documentation, units: °C/V) <-- Mile's experimentally determined this conversion factor
 
         # Stored offsets and gains
         self.amplifier_gains__ma = np.array([0.049094016,  # (ma in documentation, units: V/mv)
@@ -87,8 +89,6 @@ class Ue9LabJackADC(IADCDataProvider):
         self.amplifier_offsets__ba = self.amplifier_gains__ma * (raw_adc_readings[1:] / self.amplifier_gains__ma - (
                 self.sensor_gains__ms * self.atmospheric_psi__p_atm + self.sensor_offsets__bs))
 
-        # TODO compute adc_offset for temperature as well
-
         # Update calibration status var
         self.is_calibrated = True
 
@@ -108,8 +108,9 @@ class Ue9LabJackADC(IADCDataProvider):
         converted_pressures = ((raw_adc_readings__v[1:] - self.amplifier_offsets__ba) / self.amplifier_gains__ma - self.sensor_offsets__bs) / (
             self.sensor_gains__ms)
 
-        # TODO convert first sensor reading as well which is the temperature
-        converted_temperature = raw_adc_readings__v[0]
+        # Temperature sensor is mapped 0°C -> 1000°C = 0v -> +5v (or 1mv/5°C)
+        # The temp_sensor_amplifier_gain__m is an experimentally determined conversion factor found by the rest of the team
+        converted_temperature = raw_adc_readings__v[0]/self.temp_sensor_amplifier_gain__m
 
         # Store the final converted data in a SensorData object
         sensor_data = custom_types.SensorData(converted_temperature,

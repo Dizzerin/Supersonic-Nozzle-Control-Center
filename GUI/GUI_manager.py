@@ -1,7 +1,9 @@
+import os
 import sys
 import traceback
 from datetime import datetime
 import logging
+from queue import Queue
 from threading import Thread
 
 import dearpygui.dearpygui as dpg
@@ -26,7 +28,13 @@ ABOUT_WINDOW = None
 # Global variable to store the last exception
 last_exception = None
 
-# TODO (optional) Make this log file location and name configurable
+# Get viewport width and height
+# viewport_width = dpg.get_viewport_client_width()    # 1904
+# viewport_height = dpg.get_viewport_client_height()  # 1041
+viewport_width = 1920
+viewport_height = 1080
+
+# TODO (skip) Make this log file location and name configurable
 log_file = "Supersonic Nozzle Control Center Error Log.txt"
 
 logging.basicConfig(
@@ -41,22 +49,30 @@ def display_pre_init_error_GUI(exception: Exception):
     # Initialization for DPG
     dpg.create_context()
     dpg.create_viewport(title="Supersonic Nozzle Control Center", width=1920, height=1080, resizable=False)
+
     dpg.set_viewport_vsync(True)  # Match display's refresh rate
+
+
     dpg.setup_dearpygui()
     dpg.show_viewport()
-    # dpg.maximize_viewport()
-    title_bar_height = 47
 
+    # TODO (skip) see matching code for notes about this
+    # dpg.maximize_viewport()
+    dpg.set_viewport_width(1936)
+    dpg.set_viewport_height(1056)
     # Get viewport width and height
-    viewport_width = dpg.get_viewport_client_width()
-    viewport_height = dpg.get_viewport_client_height()
+    # viewport_width = dpg.get_viewport_client_width()
+    # viewport_height = dpg.get_viewport_client_height()
+    global viewport_width
+    global viewport_height
+    title_bar_height = 71  # Adjustment factor to account for title bar, task bar, and dear py gui/windows 11 bugs -- amount to trim background image by so no scrollbar shows
 
     # Don't show title bar
     # dpg.set_viewport_decorated(False)
 
     # Local vars
     # Note: These are only used for the button on this screen
-    # Todo (optional) implement some of this as a style and make the text larger and apply the style to these buttons instead
+    # Todo (skip) implement some of this as a style and make the text larger and apply the style to these buttons instead
     button_y_start = viewport_height / 2 + 60
     button_width = 150
     button_height = 35
@@ -74,7 +90,7 @@ def display_pre_init_error_GUI(exception: Exception):
         # dpg.add_static_texture(width=width1, height=height1, default_value=data1, tag="title_image")
         dpg.add_static_texture(width=width2, height=height2-title_bar_height, default_value=data2, tag="background_image")
 
-    # Build main welcome window
+    # Build pre-init-error-window
     with dpg.window(tag="pre-init-error-window", show=True, no_scrollbar=True):
         # Add background image
         dpg.add_image("background_image", pos=[0, 0])
@@ -91,7 +107,7 @@ def display_pre_init_error_GUI(exception: Exception):
 
     global last_exception
     last_exception = sys.exc_info()  # Store the exception
-    _show_error_window(exception)
+    _show_error_window_and_log_exception(exception)
 
     dpg.start_dearpygui()
 
@@ -105,13 +121,37 @@ def init_GUI(camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCD
     dpg.create_viewport(title="Supersonic Nozzle Control Center", width=1920, height=1080, resizable=False)
     dpg.set_viewport_pos([0, 0])  # Ensure its in the top left of the screen
     dpg.set_viewport_vsync(True)  # Match display's refresh rate
+
+    # Construct the path to the icon file relative to the script directory
+    icon_path = os.path.abspath(os.path.join('Image_Resources', 'super_sonic_icon.ico'))
+    # Set the icon
+    if os.path.exists(icon_path):
+        dpg.set_viewport_small_icon(icon_path)
+        dpg.set_viewport_large_icon(icon_path)
+    else:
+        print(f"Icon file not found at: {icon_path}")
+
     dpg.setup_dearpygui()
     dpg.show_viewport()
-    # dpg.maximize_viewport()
 
+    # TODO Note: (skip) update the display size stuff later and fix it if DPG/windows bugs are ever fixed
+    #   There is a bug (or several) in DearPyGUI that prevent windows from being sized properly...
+    #   If I try to fix it to 1920x1080 it sets it to 1904x1041
+    #   If I hide the title bar the alignment of the button click boxes gets messed up
+    #   etc. etc.  These may be Windows 10-11 specific issues, I'm not sure.
+    #   But ultimately, I want this to work on Windows on the lab computer that its designed for and I want it to not show up really badly and weirdly on monitors that are higher resolution should the lab ever get a monitor with higher resolution.
+    #   The sizing is currently all hardcoded for 1920x1080, I originally designed it to be full screened, but in order to make it more compatible
+    #   across more monitor sizes I'm no longer calling maximize_viewport() and I also decided to add the title bar back in for ease of use
+    #   On the lab computer, with the title bar and the DearPyGUI/Windows issues and the Windows taskbar showing, in order to get a full screen viewport, I have to set the viewport to
+    #   1936x1056, so that's what I'm doing.  Since I based all my positioning calculations off other values though, I'm manually passing into the window creation functions the actual resolution that should be used that it was designed for
+    # dpg.maximize_viewport()
+    dpg.set_viewport_width(1936)
+    dpg.set_viewport_height(1056)
     # Get viewport width and height
-    viewport_width = dpg.get_viewport_client_width()
-    viewport_height = dpg.get_viewport_client_height()
+    # viewport_width = dpg.get_viewport_client_width()
+    # viewport_height = dpg.get_viewport_client_height()
+    global viewport_width
+    global viewport_height
 
     # Instantiate window classes
     INITIALIZATION_WINDOW = initialization_window.InitializationWindow(camera_data_provider, ADC_data_provider, sample_thread)
@@ -127,7 +167,7 @@ def init_GUI(camera_data_provider: ICameraDataProvider, ADC_data_provider: IADCD
     CURRENT_WINDOW = WELCOME_WINDOW
 
 
-def run_GUI():
+def run_GUI(sample_thread_error_queue: Queue):
     # Render Loop
     # (This replaces start_dearpygui() and runs every frame)
     while dpg.is_dearpygui_running():
@@ -137,15 +177,25 @@ def run_GUI():
         # Save present window
         present_window = CURRENT_WINDOW
 
+        global last_exception
+
         # Call the present window's update function
         try:
             present_window.update()  # Note: this function could change the current window global
+
+            # Also check sampling thread and see if it has had any errors
+            if not sample_thread_error_queue.empty():
+                error = sample_thread_error_queue.get(block=False)
+                sample_thread_error_queue.task_done()
+                print(f"Fatal error occurred in sampling thread! Error info: {error}")
+                # Throw error in this main thread that was raised in the sampling thread
+                raise error
+
         # Catch all errors, show them before exiting
         except Exception as ex:
-            global last_exception
             last_exception = sys.exc_info()  # Store the exception
             change_window(WELCOME_WINDOW)
-            _show_error_window(ex)
+            _show_error_window_and_log_exception(ex)
 
         # When switching windows call the new window's update function
         if CURRENT_WINDOW is not present_window:
@@ -166,8 +216,11 @@ def change_window(to_window: IWindow):
     # If the to_window hasn't been created yet, create it
     if not to_window.is_created:
         # Get viewport width and height
-        viewport_width = dpg.get_viewport_client_width()
-        viewport_height = dpg.get_viewport_client_height()
+        # viewport_width = dpg.get_viewport_client_width()
+        # viewport_height = dpg.get_viewport_client_height()
+        global viewport_width
+        global viewport_height
+
         # Create the window
         to_window.create(viewport_width, viewport_height)
 
@@ -183,7 +236,7 @@ def change_window(to_window: IWindow):
         CURRENT_WINDOW = to_window
 
 
-def _show_error_window(exception: Exception):
+def _show_error_window_and_log_exception(exception: Exception):
     # Log exception/fatal error info
     global last_exception
     if last_exception:
@@ -193,15 +246,18 @@ def _show_error_window(exception: Exception):
         print("--------------------------------------")
         print(f"Fatal Error ({datetime.now()})")
         print(exc_str)
-        print("--------------------------------------")
+        print(exception)
         # Print exception and traceback to log file
         logging.error("--------------------------------------")
         logging.error(f"Fatal Error ({datetime.now()})")
         logging.error(exc_str)
+        logging.error(exception)
 
     # Determine viewport size
-    viewport_width = dpg.get_viewport_client_width()
-    viewport_height = dpg.get_viewport_client_height()
+    # viewport_width = dpg.get_viewport_client_width()
+    # viewport_height = dpg.get_viewport_client_height()
+    global viewport_width
+    global viewport_height
 
     # Window size (Note: This isn't fully used)
     window_width = 300
@@ -227,6 +283,7 @@ def _show_error_window(exception: Exception):
             label="Error!",
             tag="Error Window",
             no_close=True,
+            no_collapse=True,
             autosize=True,
             pos=(x_position, y_position)  # Center the window (this won't be exact because of the auto size)
     ):

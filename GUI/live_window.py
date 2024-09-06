@@ -333,7 +333,6 @@ class LiveWindow(IWindow):
                                 the last plot's x-axis includes labels, so the plot area is shrunk.  The ratios currently set to
                                 make all plot areas appear equal
                             """
-                            # TODO set each plot's y axis limits?
                             # Create pressure plots
                             for i in range(self.num_pressure_plots):
                                 # Add plot
@@ -355,13 +354,13 @@ class LiveWindow(IWindow):
                                 # Create x and y axes
                                 # NOTE: This x-axis is visually shared with all the pressure graphs above!
                                 dpg.add_plot_axis(dpg.mvXAxis, label="time (s)", tag="t0_x_axis")
-                                with dpg.plot_axis(dpg.mvYAxis, label="(Kelvin)", tag="t0_y_axis"):
+                                with dpg.plot_axis(dpg.mvYAxis, label="(°C)", tag="t0_y_axis"):
                                     # Create line_series plots
                                     dpg.add_line_series([], [], label="Temperature 0", tag="t0_series")
 
                     # Make "Live Data" label/title of the plot group look nicer
                     #   Set PlotPadding to 7 and LabelPadding to 11
-                    # TODO (optional) figure out why this theme isn't applying to the plot_group
+                    # TODO (skip) figure out why this theme isn't applying to the plot_group
                     #   Or maybe just add a text label and set its properties instead of adjusting all plots in the group
                     with dpg.theme() as plot_group_container_theme:
                         with dpg.theme_component():
@@ -378,9 +377,8 @@ class LiveWindow(IWindow):
                                          pos=[viewport_width // 2 + 90 + self.plot_width,
                                               55 + self.plot_height // 2 + ((self.plot_height - 8) * i)])
 
-                        # TODO is it C or Kelvin? -- Change everywhere
                         # Create text boxes for temperature plot
-                        dpg.add_text("T0: {:#8.3f} (kelvin)".format(0.0), tag="t0_text_box",
+                        dpg.add_text("T0: {:#8.3f} (°C)".format(0.0), tag="t0_text_box",
                                      pos=[viewport_width // 2 + 90 + self.plot_width,
                                           60 + self.plot_height // 2 + (
                                                       (self.plot_height - 8) * self.num_pressure_plots)])
@@ -443,7 +441,8 @@ class LiveWindow(IWindow):
                 label="Calibrate Sensor",
                 tag="Logging Error Window",
                 no_close=True,
-                # modal=True,   # TODO (optional) this makes the window not show at all, maybe because the window just before this is modal and you can only have one modal window at a time or something?  Idk...
+                no_collapse=True,
+                # modal=True,   # TODO (skip) this makes the window not show at all, maybe because the window just before this is modal and you can only have one modal window at a time or something?  Idk...
                 width=window_width,
                 height=window_height,
                 pos=(x_position, y_position)  # Center the window
@@ -497,7 +496,8 @@ class LiveWindow(IWindow):
                 label="Overwrite Confirmation",
                 tag="Confirmation Window",
                 no_close=True,
-                # modal=True,   # TODO (optional) this makes the window not show at all, maybe because the window just before this is modal and you can only have one modal window at a time or something?  Idk...
+                no_collapse=True,
+                # modal=True,   # TODO (skip) this makes the window not show at all, maybe because the window just before this is modal and you can only have one modal window at a time or something?  Idk...
                 width=window_width,
                 height=window_height,
                 pos=(x_position, y_position)  # Center the window

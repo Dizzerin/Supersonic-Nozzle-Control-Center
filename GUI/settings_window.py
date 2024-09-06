@@ -139,7 +139,7 @@ def create_settings_pop_window(config_handler: IConfigHandler, settings_window_t
         dpg.configure_item(settings_window_tag, show=False)
 
     # Create popup that can be used for warnings (hidden by default)
-    with dpg.window(label="Error!", modal=True, show=False, tag=warning_popup_tag,
+    with dpg.window(label="Error!", no_collapse=True, modal=True, show=False, tag=warning_popup_tag,
                     width=warning_window_width, height=warning_window_height,
                     pos=[int(viewport_width / 2 - warning_window_width / 2),
                          int(viewport_height / 2 - warning_window_height / 2)]):
