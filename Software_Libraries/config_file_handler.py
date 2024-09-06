@@ -6,10 +6,10 @@ import configparser
 from typing import List
 
 
-# TODO make this so when it saves/writes a file it retain comments that were in it originally if possible somehow
-# TODO Maybe make everything more dynamic based off the information this returns
+# TODO (skip) make this so when it saves/writes a file it retain comments that were in it originally if possible somehow
+# TODO (skip) Maybe make everything more dynamic based off the information this returns
 #  i.e. the number of sensors etc.
-# TODO Note: should re-read file without writing it if setting are not applied, otherwise the settings that were changed
+# TODO (skip) Note: should re-read file without writing it if setting are not applied, otherwise the settings that were changed
 #            will remain a part of this class and get handed around but be incorrect because the user didn't actually
 #           chose to save the changes.
 
@@ -209,6 +209,6 @@ class ConfigHandler(IConfigHandler):
             self.set_temperature_sensor(t_sensor)
 
     def write_config_file(self):
-        # Todo report success/failure and/or handle errors?
+        # Todo (skip) report success/failure and/or handle errors?
         with open(self._config_filepath, 'w') as ConfigFileHandle:
             self._config.write(ConfigFileHandle)

@@ -15,7 +15,7 @@ from Software_Interfaces.config_handler_interface import IConfigHandler
 from GUI import initialization_window, welcome_window, live_window, about_window
 
 # Global variables (only used for the GUI)
-# TODO (optional) maybe later make these not globals (create these windows in init function, return them, and pass them into the
+# TODO (skip) maybe later make these not globals (create these windows in init function, return them, and pass them into the
 #   constructor of any other windows that need to use these (i.e. next_window)
 #   this would also make it so the create functions wouldn't be needed and could be done inside the concrete class's init
 INITIALIZATION_WINDOW = None

@@ -17,7 +17,7 @@ class Ue9LabJackADC(IADCDataProvider):
         self.device = None
 
         # Configurable parameters
-        # TODO (optional) make it so below is configurable and read from config file or something
+        # TODO (skip) make it so below is configurable and read from config file or something
         self.input_map = {  # Maps the inputs to the inputs on the ADC
             "t0": 0,
             "p0": 1,

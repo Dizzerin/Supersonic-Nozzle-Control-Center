@@ -49,12 +49,12 @@ class InitializationWindow(IWindow):
         called, and then nothing there after since this function is called every frame.  The only time the body of this
         should really be performed is on the second call to this function.
         Update: It actually seems to yield a smoother UI experience if the body is run on the third update call.
-        # todo and maybe when the user makes a change?  But maybe that should be handled in callbacks instead
-        # todo make it so the initialization gets tried again each time the screen is changed to this screen
+        # todo (skip) and maybe when the user makes a change?  But maybe that should be handled in callbacks instead
+        # todo (skip) make it so the initialization gets tried again each time the screen is changed to this screen
         #   i.e. when it doesn't work the first try, someone goes back home, changes a setting, and then
         #   comes back to this screen to try again
-        # todo test multi-camera available code and no camera available code (using test camera class)
-        # todo make sure initialization gets tried again when the user selects a camera to use
+        # todo (skip) test multi-camera available code and no camera available code (using test camera class)
+        # todo (skip) make sure initialization gets tried again when the user selects a camera to use
         """
         self.num_update_calls += 1
 
@@ -73,7 +73,7 @@ class InitializationWindow(IWindow):
                 self.sampling_thread.start()
 
             # Try to initialize default camera
-            # TODO get default camera from config/settings file
+            # TODO (skip) get default camera from config/settings file
             self.camera_index = 0
             self.camera_provider.initialize_capture(camera_index=self.camera_index)
             if self.camera_provider.is_ready:
@@ -81,7 +81,7 @@ class InitializationWindow(IWindow):
             # Else find available cameras and get user selection
             else:
                 # Get list of available cameras
-                # TODO implement multi-threading so this doesn't lock up the UI while it searches for cameras...
+                # TODO (skip) implement multi-threading so this doesn't lock up the UI while it searches for cameras...
                 self.available_cameras = self.camera_provider.get_available_cameras()
                 # Add available cameras to dropdown selection list
                 dpg.configure_item(self.camera_combo_select_tag, items=self.available_cameras)
@@ -104,7 +104,7 @@ class InitializationWindow(IWindow):
 
                     # Display combo box for user to select camera
                     dpg.configure_item(self.camera_combo_select_tag, show=True)
-                    # TODO actually get camera index from user selection or file or default etc. -- will need callback
+                    # TODO (skip) actually get camera index from user selection or file or default etc. -- will need callback
 
         # Once everything is ready, proceed to live session window
         if self.ADC_ready and self.camera_ready:
@@ -124,9 +124,8 @@ class InitializationWindow(IWindow):
 
         # Build the window
         with dpg.window(tag=self.tag(), show=True, no_scrollbar=True):
-            # TODO Verify positioning of all objects on this window
             # Add background image
-            # TODO should probably handle this image differently, see note below
+            # TODO (skip) should probably handle this image differently, see note below
             # Note: This depends on this image already being created and in the texture registry from the welcome screen
             dpg.add_image("background_image", pos=[0, 0])
 

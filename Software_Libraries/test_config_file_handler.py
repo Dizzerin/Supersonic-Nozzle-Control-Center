@@ -4,9 +4,9 @@ from Software_Libraries.config_file_handler import ConfigHandler
 
 
 # Quick file to run some basic test -- not full coverage
-# TODO write this so it has more coverage
-# TODO Note: Should not be able to add pressure sensors with new names (section must already exist in file)
-# TODO Note: Pressure sensor names should be UPPER CASE
+# TODO (skip) write this so it has more coverage
+# TODO (skip) Note: Should not be able to add pressure sensors with new names (section must already exist in file)
+# TODO (skip) Note: Pressure sensor names should be UPPER CASE
 
 
 class TestConfigFileHandler(TestCase):

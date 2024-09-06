@@ -4,7 +4,7 @@ from Custom_Types.custom_types import TemperatureSensorConfigData, PressureSenso
 import configparser
 from typing import List
 
-# TODO implement use of this!!! Also maybe make everything more dynamic based off the information this returns
+# TODO (skip) implement use of this!!! Also maybe make everything more dynamic based off the information this returns
 #  i.e. the number of sensors etc. -- OR JUST REMOVE THE CONFIG AND SETTINGS FEATURE
 
 
@@ -110,6 +110,6 @@ class INIConfigHandler(IConfigHandler):
         self.adc_input_mapping_section[adc_map_obj.sensor_name.value] = adc_map_obj.adc_input.value
 
     def write_config_file(self):
-        # Todo report success/failure and/or handle errors?
+        # Todo (skip) report success/failure and/or handle errors?
         with open(self.config_file, 'w') as ConfigFileHandle:
             self.config.write(ConfigFileHandle)

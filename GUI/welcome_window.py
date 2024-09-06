@@ -15,7 +15,7 @@ class WelcomeWindow(IWindow):
         self._settings_window_tag = "settings_window"
         self._config_handler = config_handler
 
-        # TODO (optional) create rounded transparent button style and apply to buttons on this screen
+        # TODO (skip) create rounded transparent button style and apply to buttons on this screen
 
     def is_created(self) -> bool:
         return self.is_created
@@ -77,7 +77,7 @@ class WelcomeWindow(IWindow):
                            pos=[int(viewport_width / 2 - button_width / 2), button_y_start + 2 * button_y_spacing],
                            callback=dpg.stop_dearpygui)
 
-            # TODO (Optional) Add settings feature back in
+            # TODO (skip) Add settings feature back in
             #   For now I have chosen to simply remove this button so it can't be accessed this way.
             #   In theory you can still directly edit the config.cfg file, but not all of the settings in there are actually used... hence why I am removing the obvious access to modify the settings.
             #   Reasons this was removed:

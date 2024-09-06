@@ -28,11 +28,9 @@ class ADCTestDevice(IADCDataProvider):
         return self.is_ready
 
     def calibrate(self):
-        # TODO test calibration offsets etc.?
         print("ADC calibration routine called")
 
     def _convert_raw_data(self, data_array) -> custom_types.SensorData:
-        # TODO test calibration offsets etc.?
         converted_data = custom_types.SensorData(datetime.now(),
                                                  data_array[0],
                                                  data_array[1],

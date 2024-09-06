@@ -252,7 +252,7 @@ class LiveWindow(IWindow):
                         # Focus and brightness sliders
                         slider_and_button_width = 150
                         with dpg.group(horizontal=False):
-                            # Todo Verify range
+                            # Todo (skip) Verify range
                             dpg.add_slider_int(label="Focus", tag=self.focus_slider_tag, vertical=False,
                                                default_value=0,
                                                min_value=0,
@@ -369,7 +369,7 @@ class LiveWindow(IWindow):
                             dpg.add_theme_style(dpg.mvPlotStyleVar_LabelPadding, 10)
                     dpg.bind_item_theme(plot_group, plot_group_container_theme)
 
-                    # TODO (optional) Apply a theme to these to make them nicer, maybe a light background and border?
+                    # TODO (skip) Apply a theme to these to make them nicer, maybe a light background and border?
                     # Now add the text boxes next to the plots with their current values
                     with dpg.group(horizontal=False) as label_group:
                         # Create text boxes for pressure plots
@@ -391,7 +391,7 @@ class LiveWindow(IWindow):
                                           60 + ((self.plot_height - 5) * (self.num_pressure_plots + 1))])
 
                     # Add tooltips to temperature and pressure plots and text boxes
-                    # TODO (optional) use this from config file
+                    # TODO (skip) use this from config file
                     descriptions = {"t0_y_axis": "Temperature inside the tank (stagnation temperature)",
                                     "p0_y_axis": "Pressure inside the tank (stagnation pressure)",
                                     "p1_y_axis": "Pressure upstream of the throat",

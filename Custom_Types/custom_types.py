@@ -27,7 +27,7 @@ class SensorDataTimed:
     elapsed_time: float         # seconds since program start/logging start
 
 
-# TODO (optional) only store the amount of data necessary for display (so it doesn't continually increase memory consumption)
+# TODO (skip) only store the amount of data necessary for display (so it doesn't continually increase memory consumption)
 class DataStore:
 
     def __init__(self):
