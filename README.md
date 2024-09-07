@@ -29,6 +29,7 @@ To install this software for use in the Fluid's lab, the following steps should 
     * The standalone LabJack ADC driver required for this program to run properly and communicate with the LabJack ADC can be downloaded from [here](https://support.labjack.com/docs/windows-setup-basic-driver-only).  (Note this installer supports silent install parameters etc.!)
       * [Direct download link](https://support.labjack.com/__attachments/49547062/labjackbasic-2019-05-20.exe?inst-v=53c3afbe-b679-4ae4-ad8c-e895cddff14e) 
     * Or, if desired, you can download the full LabJack UD software package [here](https://support.labjack.com/docs/ud-software-installer-downloads-u3-u6-ue9).  This full package installer includes several graphical programs that can be used to interface directly with the LabJack ADC.  This is not necessary for this project as this project only requires the driver
+		* Note: If for some reason the LabJack driver ever becomes unavailable, there is a backup copy of it located in the repository [here](Other%20Dependencies/LabJack%20Drivers/labjackbasic-driver_only.exe).
         * [Direct download link](https://files.labjack.com/installers/LJM/Windows/x86_64/release/LabJack_2024-05-16.exe)
 5. Download and install [OBS Studio](https://obsproject.com) for screen recording
     * Download OBS Studio [here](https://obsproject.com/download).
