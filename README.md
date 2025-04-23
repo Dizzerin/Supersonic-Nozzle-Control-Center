@@ -7,6 +7,20 @@ The lab experiment requires screen recording functionality.  Sadly DearPyGUI doe
 
 To read the full project paper, see [Final Paper.pdf](Reference%20Materials/Full%20Project%20Paper%20and%20Documentation/Final%20Paper.pdf).
 
+# Screenshots
+Welcome screen
+![Screenshot of the welcome screen](https://github.com/Dizzerin/Supersonic-Nozzle-Control-Center/blob/main/Software%20Screenshots/Welcome%20Window.png)
+
+Initialization screen
+![Screenshot of the initialization screen](https://github.com/Dizzerin/Supersonic-Nozzle-Control-Center/blob/main/Software%20Screenshots/Initialization%20Window.png)
+
+Live view screen
+![Screenshot of the live view screen](https://github.com/Dizzerin/Supersonic-Nozzle-Control-Center/blob/main/Software%20Screenshots/Live%20Window%20With%20Tooltip.png)
+(Note: This screenshot was taken during development before being placed in the final lab environment, so the camera was pointed at a piece of paper representing the supersonic nozzle in this screenshot rather than the actual nozzle itself.)
+
+Settings Screen
+![Screenshot of the settings screen](https://github.com/Dizzerin/Supersonic-Nozzle-Control-Center/blob/main/Software%20Screenshots/Settings%20Window.png)
+
 ---
 ## Installation Guide For Lab Use
 To install this software for use in the Fluid's lab, the following steps should be taken:
